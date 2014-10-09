@@ -19,7 +19,7 @@ public class ErrorCorrectionTest {
                 int toFindHapl = Integer.parseInt(args[4]);
                 int errorsseglen = Integer.parseInt(args[5]);*/
                 
-                String folder_name  = "Sana";
+                String folder_name  = "Hong";
                 
                 File folder = new File(folder_name);
                 
