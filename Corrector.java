@@ -31,6 +31,7 @@ public class Corrector {
         boolean toRemoveAllUncorrect;
         boolean toPrintStat;
         boolean toPostprocessHeur;
+        String outfolder;
  	Corrector(DataSet d)
 	{
 		ds = d;
@@ -40,10 +41,11 @@ public class Corrector {
 		maxz = 1;
 		toFindHapl = true;
                 minNReads = 1000;
+                outfolder = "";
 	}
         public Corrector()
         {
-
+            outfolder = "";
         }
 	void setNIter(int j)
 	{
@@ -83,6 +85,10 @@ public class Corrector {
         void setToPostprocessHeur(boolean b)
         {
             toPostprocessHeur = b;
+        }
+        void setOutfolder(String s)
+        {
+            this.outfolder = s;
         }
 	void run() throws IOException, InterruptedException, ExecutionException
 	{
@@ -434,7 +440,8 @@ public class Corrector {
                 
  //               d = findClosestHapl(refr,15,6.6);
 
-                FileWriter fw = new FileWriter(ds.file_name + "_log.txt");
+                String logfilename = outfolder + File.separator + ds.file_name_short + "_log.txt";
+                FileWriter fw = new FileWriter(logfilename);
                 fw.write("Thresholds: " + thresholds + "\n");
                 fw.write("Errors: " + nErrors + "\n");
                 fw.write("MaxReadslen: " + maxReadsLen+ "\n");

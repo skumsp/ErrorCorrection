@@ -2,6 +2,7 @@ package ErrorCorrection;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.concurrent.ExecutionException;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
@@ -17,6 +18,7 @@ public class ErrorCorrection {
         private static final String H_PARAMETER = "H";
         private static final String LEN_PARAMETER = "len";
         private static final String READS_PARAMETER = "in";
+        private static final String OUT_PARAMETER = "out";
         private static final String REFERENCE_PARAMETER = "refs";
         private static final String DOMINGEN_PARAMETER = "domgen";
         private static final String DOMINPOSTPROC_PARAMETER = "dompostproc";
@@ -54,6 +56,7 @@ public class ErrorCorrection {
                 int toFindHapl = 1;
                 String alignmethod = ""; // "Muscle" or "Clustal"
                 int lt = 50;
+                String outFolder = "";
                 
                 MutuallyExclusiveGroup group = parser.addMutuallyExclusiveGroup("Align");
 
@@ -78,10 +81,17 @@ public class ErrorCorrection {
 
                 parser.addArgument("-in").dest(READS_PARAMETER)
                         .metavar("Reads File")
-                        .help("File containing reads to be corrected "
-                        + " file with extension .fasta (.fas) "
+                        .help("Folder with files containing reads to be corrected "
+                        + " files with extension .fasta (.fas) "
                         + "reads in fasta format")
                         .type(File.class);
+                
+                parser.addArgument("-out").dest(OUT_PARAMETER)
+                        .metavar("Output folder")
+                        .help("Folder for output files " +
+                                "default: the same as input folder")
+                        .setDefault("")
+                        .type(String.class);
                 
                 parser.addArgument("-refs").dest(REFERENCE_PARAMETER)
                         .metavar("Reference File")
@@ -146,6 +156,18 @@ public class ErrorCorrection {
                         + "(Default: " + dominparampostpr + ")");
 
                 try {
+/*                    args = new String[6];
+                    args[0] = new String("-in");
+                    args[1] = new String("G:\\AMD_outbreak\\test\\input");
+                    args[2] = new String("-refs");
+                    args[3] = new String("G:\\AMD_outbreak\\test\\ref_HVR1.fas");
+                    args[4] = new String("-out");
+                    args[5] = new String("G:\\AMD_outbreak\\test\\output");
+                    for (int i = 0; i < args.length; i++)
+                    System.out.println(args[i]);*/
+                    
+                    
+                    
                     Namespace n = parser.parseArgs(args);
                     k = n.getInt(K_PARAMETER);
                     nIter = n.getInt(I_PARAMETER);
@@ -154,20 +176,30 @@ public class ErrorCorrection {
                     alignmethod = "".equals(muscle) ? clustalw : muscle;
                     errorsseglen = n.getInt(L_PARAMETER);
                     fl = (File) n.get(READS_PARAMETER);
+                    outFolder = n.getString(OUT_PARAMETER);
                     fl_ref = (File) n.get(REFERENCE_PARAMETER);
                     dominparamgen = n.getInt(DOMINGEN_PARAMETER);
                     dominparampostpr = n.getInt(DOMINPOSTPROC_PARAMETER);
                     toFindHapl = n.getInt(H_PARAMETER);
                     lt = n.getInt(LEN_PARAMETER);
                 } catch (ArgumentParserException e) {
+                    e.printStackTrace();
                     parser.handleError(e);
                     System.exit(1);
                 }
                 
                 
 		                
-		String folder_name  = fl.getName();
-                String refFile_name = fl_ref.getName();
+		String folder_name  = fl.getPath();
+                if (outFolder.length()  == 0)
+                    outFolder = folder_name;
+                else
+                {
+                    File f = new File(outFolder);
+                    f.mkdir();
+                }
+                String refFile_name = fl_ref.getPath();
+                
                 
                 DataSet refs = new DataSet(refFile_name);
                 
@@ -200,12 +232,14 @@ public class ErrorCorrection {
                     
 
                     String dset_file = list_files[i].getPath();
+                    String dset_file_name = list_files[i].getName();
 
                     DataSet ds = new DataSet(dset_file);
                     ds.setK(k);
                     ds.setLenThr(lt);
                     ds.setMaxAllErrorsPerc(mErPerc);
                     ds.setFindErrorsSeglen(errorsseglen);
+                    ds.setFileNameShort(dset_file_name);
                     
                     ds.fixDirectionRefParallel(refs, gapop, gapext);
 
@@ -219,56 +253,50 @@ public class ErrorCorrection {
                     cr.setToPrintStat(toPrintStat);
                     cr.setToPostprocessHeur(toPostprocessHeur);
                     cr.setMinNReads(minNReads);
+                    cr.setOutfolder(outFolder);
                     cr.run();
                     ds = cr.CorrectedReads();
 
-                    ds.PrintCorrectedReads(dset_file+"_corrected.fas");
-                    if (toFindHapl == 1)
-                    {
-                        ds.PrintHaplotypes(dset_file+"_haplotypes.fas");
-    //                    cr.postprocessHaplotypes(dset_file_name+"_haplotypes.fas",15,6.6, dominparampostpr);
-    //                    cr.postprocessHaplotypes(dset_file_name+"_haplotypes.fas_postprocessed.fas",1,1);
-    //                    cr.printRevComp(dset_file_name +"_haplotypes.fas_postprocessed.fas");
-                    }
-
+                    ds.PrintCorrectedReads(outFolder + File.separator +dset_file_name+"_corrected.fas");
                     System.out.println("Finished stage 1!");
 
 
                     // SECOND RUN
-                    maxz = 0;
-                    nIter = 0;
-                    toPrintStat = false;
-                    toDelUncor = true;
-                    toPostprocessHeur = false; //???
-                    dset_file = dset_file+"_corrected.fas";
-                    dset_file = dset_file;
-                    toFindHapl = 1;
-                    toCalcHapl = true;
+                    int maxz_postp = 0;
+                    int nIter_postp = 0;
+                    boolean toPrintStat_postp = false;
+                    boolean toDelUncor_postp = true;
+                    boolean toPostprocessHeur_postp = false; //???
+                    dset_file = outFolder + File.separator +dset_file_name+"_corrected.fas";
+                    dset_file_name = dset_file_name+"_corrected.fas";
+                    int toFindHapl_postp = 1;
+                    boolean toCalcHapl_postp = true;
 
                     ds = new DataSet(dset_file);
                     ds.setK(k);
                     ds.setLenThr(lt);
                     ds.setMaxAllErrorsPerc(mErPerc);
                     ds.setFindErrorsSeglen(errorsseglen);
-                    minNReads = 1;
+                    ds.setFileNameShort(dset_file_name);
+                    int minNReads_postp = 1;
 
 
                     cr = new Corrector(ds);
-                    cr.setMaxz(maxz);
-                    cr.setNIter(nIter);
+                    cr.setMaxz(maxz_postp);
+                    cr.setNIter(nIter_postp);
                     cr.setToClust(toClust);
                     cr.setKmin(kmin);
-                    cr.setToRemoveAllUncorrect(toDelUncor);
-                    cr.setToFindHapl(toCalcHapl);
-                    cr.setToPrintStat(toPrintStat);
-                    cr.setToPostprocessHeur(toPostprocessHeur);
-                    cr.setMinNReads(minNReads);
+                    cr.setToRemoveAllUncorrect(toDelUncor_postp);
+                    cr.setToFindHapl(toCalcHapl_postp);
+                    cr.setToPrintStat(toPrintStat_postp);
+                    cr.setToPostprocessHeur(toPostprocessHeur_postp);
+                    cr.setMinNReads(minNReads_postp);
+                    cr.setOutfolder(outFolder);
                     cr.run();
                     ds = cr.CorrectedReads();
 
                     ds.PrintCorrectedReads(dset_file+"_corrected.fas");
-                    ds.PrintHaplotypes(dset_file+"_haplotypes.fas");
-                    if (toFindHapl == 1)
+                    if (toFindHapl_postp == 1)
                     {
                         ds.PrintHaplotypes(dset_file+"_haplotypes.fas");
     /*                    cr.postprocessHaplotypes(dset_file_name+"_haplotypes.fas",15,6.6,dominparampostpr);

@@ -14,6 +14,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
+import java.util.StringTokenizer;
 import java.util.concurrent.Callable;
 
 public class ClustTask implements Callable {
@@ -48,7 +50,19 @@ public class ClustTask implements Callable {
 			 
 			 Runtime run=Runtime.getRuntime(); 
 			 Process p=null;
-                         String exPath = "fams"+File.separator+"fams 0 0 200 " + "kmer" + count + "data ."+ File.separator;
+                         
+                         URL addrURL = getClass().getProtectionDomain().getCodeSource().getLocation();
+                         String addr =  addrURL.getPath();
+//                         System.out.println(addr);
+                         StringTokenizer st = new StringTokenizer(addr,"/");
+                         int m = st.countTokens();
+                         String addrFAMS = "";
+                         for (int i  = 0; i < m-1; i++)
+                             addrFAMS += st.nextToken() + File.separator;     
+//                         System.out.println(addrFAMS);
+//                         System.in.read();
+                         
+                         String exPath = addrFAMS + "fams"+File.separator+"fams 0 0 200 " + "kmer" + count + "data ."+ File.separator;
 			 p=run.exec(exPath); 
 			 try {
 				p.waitFor();

@@ -24,6 +24,7 @@ public class DataSet {
 	ArrayList<Haplotype> haplotypes;
 	int k;
 	String file_name;
+        String file_name_short;
 	int[] valuesDistribution;
 	int[] valuesDistribution1;
         int finderrorsseglen;
@@ -372,6 +373,7 @@ public class DataSet {
 		allKmers = new ArrayList<Kmer_general>();
 		haplotypes = new ArrayList<Haplotype>();
 		file_name = ds.file_name;
+                file_name_short = ds.file_name_short;
 		k = ds.k;
                 finderrorsseglen =ds.finderrorsseglen;
 		
@@ -434,6 +436,7 @@ public class DataSet {
 		allKmers = new ArrayList<Kmer_general>();
 		haplotypes = new ArrayList<Haplotype>();
 		file_name = ds.file_name;
+                file_name_short = ds.file_name_short;
 		k = ds.k;
                 finderrorsseglen =ds.finderrorsseglen;
                 
@@ -726,6 +729,10 @@ public class DataSet {
         {
             this.file_name = s;
         }
+        public void setFileNameShort(String s)
+        {
+            this.file_name_short = s;
+        }
 	public void calculateKMersAndKCounts()
 	{
 		HashMap<String, ArrayList<Kmer_occur>> kmers= new HashMap<String, ArrayList<Kmer_occur>>();
@@ -831,6 +838,7 @@ public class DataSet {
                             System.gc();
                             count1 = 0;
                          }
+                                                 
                          String exPath = "fams"+File.separator+"fams 0 0 200 " + "kmer" + count + "data ."+ File.separator;
 			 p=run.exec(exPath); 
 //			 p=run.exec("fams 0 0 200 " + "kmer" + count + "data .\\"); 
