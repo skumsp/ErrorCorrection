@@ -477,7 +477,6 @@ public class Read extends Sequence {
  
 		SequencePair<DNASequence, NucleotideCompound> psa = Alignments.getPairwiseAlignment(query, target, PairwiseSequenceAlignerType.GLOBAL, gapP, matrix);
                 
-                
                return psa.getLength() - psa.getNumIdenticals();
                
                 

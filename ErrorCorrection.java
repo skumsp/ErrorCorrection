@@ -17,6 +17,7 @@ public class ErrorCorrection {
         private static final String L_PARAMETER = "L";
         private static final String H_PARAMETER = "H";
         private static final String LEN_PARAMETER = "len";
+        private static final String NPROC_PARAMETER = "nproc";
         private static final String READS_PARAMETER = "in";
         private static final String OUT_PARAMETER = "out";
         private static final String REFERENCE_PARAMETER = "refs";
@@ -54,6 +55,7 @@ public class ErrorCorrection {
                 File fl = null;
                 File fl_ref = null;
                 int toFindHapl = 1;
+                int nProc = Runtime.getRuntime().availableProcessors();
                 String alignmethod = ""; // "Muscle" or "Clustal"
                 int lt = 50;
                 String outFolder = "";
@@ -106,6 +108,13 @@ public class ErrorCorrection {
                         .type(Integer.class)
                         .help("Parameter k - the size of k-mers "
                         + "Default: " + k + ")");
+                
+                parser.addArgument("-nproc").dest(NPROC_PARAMETER)
+                        .metavar("Number of used cores")
+                        .setDefault(nProc)
+                        .type(Integer.class)
+                        .help("Parameter proc - the number of used cores"
+                        + "Default: all available");
                 
                 parser.addArgument("-len").dest(LEN_PARAMETER)
                         .metavar("Minimum reads length")
@@ -170,6 +179,7 @@ public class ErrorCorrection {
                     
                     Namespace n = parser.parseArgs(args);
                     k = n.getInt(K_PARAMETER);
+                    nProc = n.getInt(NPROC_PARAMETER);
                     nIter = n.getInt(I_PARAMETER);
                     String muscle = n.getString(MUSCLE_PARAMETER);
                     String clustalw = n.getString(CLUSTAL_PARAMETER);
@@ -236,6 +246,7 @@ public class ErrorCorrection {
 
                     DataSet ds = new DataSet(dset_file);
                     ds.setK(k);
+                    ds.setAvProc(nProc);
                     ds.setLenThr(lt);
                     ds.setMaxAllErrorsPerc(mErPerc);
                     ds.setFindErrorsSeglen(errorsseglen);
@@ -274,6 +285,7 @@ public class ErrorCorrection {
 
                     ds = new DataSet(dset_file);
                     ds.setK(k);
+                    ds.setAvProc(nProc);
                     ds.setLenThr(lt);
                     ds.setMaxAllErrorsPerc(mErPerc);
                     ds.setFindErrorsSeglen(errorsseglen);

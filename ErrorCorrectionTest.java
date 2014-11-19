@@ -19,7 +19,7 @@ public class ErrorCorrectionTest {
                 int toFindHapl = Integer.parseInt(args[4]);
                 int errorsseglen = Integer.parseInt(args[5]);*/
                 
-                String folder_name  = "G:" + File.separator + "AMD_outbreak" + File.separator + "test" + File.separator + "input";
+                String folder_name  = "input";
                 
                 File folder = new File(folder_name);
                 
@@ -38,9 +38,9 @@ public class ErrorCorrectionTest {
                     int nIter = 3;
                     int toFindHapl = 1;
                     int errorsseglen = 0;
-                    String refFile_name = "G:" + File.separator + "AMD_outbreak" + File.separator + "test" + File.separator + "ref_HVR1.fas";
+//                    String refFile_name = "G:" + File.separator + "AMD_outbreak" + File.separator + "test" + File.separator + "ref_HVR1.fas";
                 
-                    DataSet refs = new DataSet(refFile_name);
+//                    DataSet refs = new DataSet(refFile_name);
 
                     int gapop = 15;
                     int gapext = 6;
@@ -53,6 +53,7 @@ public class ErrorCorrectionTest {
                     int dominparamgen = 25;
                     int dominparampostpr = 25; //30
                     int minNReads = 10;
+                    int nProc = Runtime.getRuntime().availableProcessors();
                     boolean toPrintStat = false;
 
                     int maxz = 3;
@@ -69,8 +70,9 @@ public class ErrorCorrectionTest {
                     ds.setLenThr(lt);
                     ds.setMaxAllErrorsPerc(mErPerc);
                     ds.setFindErrorsSeglen(errorsseglen);
+                    ds.setAvProc(nProc);
                     
-                    ds.fixDirectionRefParallel(refs, gapop, gapext);
+//                    ds.fixDirectionRefParallel(refs, gapop, gapext);
 
                     Corrector cr = new Corrector(ds);
                     cr.setMaxz(maxz);

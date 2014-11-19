@@ -28,6 +28,7 @@ public class DataSet {
 	int[] valuesDistribution;
 	int[] valuesDistribution1;
         int finderrorsseglen;
+        int avProc;
 	public DataSet (String addr) throws IOException
 	{
 		lengthThr = 50;
@@ -367,6 +368,7 @@ public class DataSet {
 	{
 		freqThr = ds.freqThr;
 		lengthThr = ds.lengthThr;
+                this.avProc = ds.avProc;
 		additionalfreqThrMult = ds.additionalfreqThrMult;
 		maxAllErrorsPerc = ds.maxAllErrorsPerc;
 		reads = new ArrayList<Read>();
@@ -438,6 +440,7 @@ public class DataSet {
 		file_name = ds.file_name;
                 file_name_short = ds.file_name_short;
 		k = ds.k;
+                this.avProc = ds.avProc;
                 finderrorsseglen =ds.finderrorsseglen;
                 
                 String tag = "";
@@ -689,6 +692,7 @@ public class DataSet {
                 lengthThr = 50;
                 additionalfreqThrMult = 10;
                 maxAllErrorsPerc = 40;
+                this.avProc = ds.avProc;
                 freqThr = -1;
 		reads = new ArrayList<Read>();
 		allKmers = new ArrayList<Kmer_general>();
@@ -732,6 +736,10 @@ public class DataSet {
         public void setFileNameShort(String s)
         {
             this.file_name_short = s;
+        }
+        public void setAvProc(int i)
+        {
+            this.avProc = i;
         }
 	public void calculateKMersAndKCounts()
 	{
@@ -892,7 +900,8 @@ public class DataSet {
 		 int count = 0;
                  int count1 = 0;
                  List< Future > futuresList = new ArrayList< Future >();
-                 int nrOfProcessors = Runtime.getRuntime().availableProcessors();
+//                 int nrOfProcessors = Runtime.getRuntime().availableProcessors();
+                 int nrOfProcessors = this.avProc;
                  ExecutorService eservice = Executors.newFixedThreadPool(nrOfProcessors);
                  
 		 for (Read r : reads)
@@ -1857,8 +1866,10 @@ public class DataSet {
                 int goodhapl = 0;
                 int badhapl = 0;
                 int lenratio = 90; //90
+                int i = 1;
 		for (Read r : reads)
 		{
+                    System.out.println("Hapl: read " + i + "\\" + reads.size());
 			boolean toAdd = true;
 			int nhap = 0;
 			for (Haplotype h : haplotypes)

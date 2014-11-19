@@ -41,7 +41,9 @@ public class ClustTask implements Callable {
    public Object call() throws FileNotFoundException, IOException 
    {
      
-			 File f = new File("kmer" + count + "data.txt");
+                         int maxID = 1000000;
+                         int clustID = (int) (Math.random()*maxID);
+			 File f = new File("kmer" + count + "data" + clustID + ".txt");
 			 FileWriter fw = new FileWriter(f);
 			 fw.write(r.kmers.size() + " " + 1 + "\n");
 			 for (Kmer km : r.kmers)
@@ -62,7 +64,7 @@ public class ClustTask implements Callable {
 //                         System.out.println(addrFAMS);
 //                         System.in.read();
                          
-                         String exPath = addrFAMS + "fams"+File.separator+"fams 0 0 200 " + "kmer" + count + "data ."+ File.separator;
+                         String exPath = File.separator + addrFAMS + "fams"+File.separator+"fams.exe 0 0 200 " + "kmer" + count + "data" + clustID + " ."+ File.separator;
 			 p=run.exec(exPath); 
 			 try {
 				p.waitFor();
@@ -75,7 +77,7 @@ public class ClustTask implements Callable {
 				 return -1;
 			 }
 			 
-			 File fout = new File("out_" + "kmer" + count + "data.txt");
+			 File fout = new File("out_" + "kmer" + count + "data" + clustID + ".txt");
 			 
 			 FileReader fr = new FileReader(fout);
 			 BufferedReader br = new BufferedReader(fr);
@@ -92,11 +94,11 @@ public class ClustTask implements Callable {
                          fr.close();
 			 
 			 f.delete();
-                         f = new File("pilot_200_" + "kmer" + count + "data.txt");
+                         f = new File("pilot_200_" + "kmer" + count + "data" + clustID +".txt");
                          f.delete();
-                         f = new File("modes_" + "kmer" + count + "data.txt");
+                         f = new File("modes_" + "kmer" + count + "data" + clustID +".txt");
                          f.delete();
-                         f = new File("out_kmer" + count + "data.txt");
+                         f = new File("out_kmer" + count + "data" + clustID + ".txt");
                          f.delete();
       return count;
     }
