@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package errorcorrection;
+package ErrorCorrection;
 
 import org.biojava3.alignment.Alignments;
 import org.biojava3.alignment.Alignments.PairwiseSequenceAlignerType;

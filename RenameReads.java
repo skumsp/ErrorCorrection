@@ -4,7 +4,6 @@
  */
 package ErrorCorrection;
 
-import ErrorCorrection.Corrector;
 import java.io.File;
 import java.io.IOException;
 import java.util.StringTokenizer;

@@ -380,6 +380,78 @@ public class DataSet {
                 finderrorsseglen =ds.finderrorsseglen;
 		
 		HashMap<String,Integer> seq = new HashMap<String, Integer>();
+                HashMap<String,String> genot = new HashMap<String, String>();
+                
+                int iread = 0;
+		
+		for(Read r : ds.reads)
+		{
+                        iread++;
+			String nucl = "";
+			for (int i = 0; i < r.getLength(); i++)
+				if (r.corrections[i] != null)
+				{
+					if (r.corrections[i].type == 'R')
+						nucl = nucl + r.corrections[i].replacement;
+					if (r.corrections[i].type == 'I')
+						nucl = nucl + r.nucl.charAt(i) + r.corrections[i].replacement;
+				}
+				else
+					nucl = nucl + r.nucl.charAt(i);
+                        String nucl1 = "";
+                        for (int i = 0; i < nucl.length(); i++)
+                            if (nucl.charAt(i)!='-')
+                                nucl1 = nucl1 + nucl.charAt(i);
+                        nucl = nucl1;
+			if (nucl.length() > lengthThr)
+                        {
+/*                            Corrector cr = new Corrector();
+                            System.out.println("Checking consistency: read" + iread + "//" + ds.reads.size());
+                            if (!cr.checkConsistencyKmers(nucl, ds))
+                                continue; */
+                            
+				if (seq.containsKey(nucl))
+                                {
+					seq.put(nucl, seq.get(nucl)+r.frequency);
+                                        genot.put(nucl, r.genotype);
+                                }
+				else
+                                {
+					seq.put(nucl, r.frequency);
+                                        genot.put(nucl, r.genotype);
+                                }
+                        }
+		}
+		Iterator it = seq.entrySet().iterator();
+		int count = 1;
+		while (it.hasNext())
+		{
+			Map.Entry me = (Map.Entry)it.next();
+			String nucleo = (String) me.getKey(); 
+			int f = (Integer) me.getValue();
+                        String gen = (String) genot.get(nucleo);
+			String nm = "read" + count;
+			if (nucleo.length() > lengthThr)
+				reads.add(new Read(nucleo,nm,f,gen));
+			count++;
+		}
+	}
+        public DataSet(DataSet ds, boolean noGenotyping)
+	{
+		freqThr = ds.freqThr;
+		lengthThr = ds.lengthThr;
+                this.avProc = ds.avProc;
+		additionalfreqThrMult = ds.additionalfreqThrMult;
+		maxAllErrorsPerc = ds.maxAllErrorsPerc;
+		reads = new ArrayList<Read>();
+		allKmers = new ArrayList<Kmer_general>();
+		haplotypes = new ArrayList<Haplotype>();
+		file_name = ds.file_name;
+                file_name_short = ds.file_name_short;
+		k = ds.k;
+                finderrorsseglen =ds.finderrorsseglen;
+		
+		HashMap<String,Integer> seq = new HashMap<String, Integer>();
                 
                 int iread = 0;
 		
@@ -743,6 +815,7 @@ public class DataSet {
         }
 	public void calculateKMersAndKCounts()
 	{
+//                allKmers = new  ArrayList<Kmer_general>(); 
 		HashMap<String, ArrayList<Kmer_occur>> kmers= new HashMap<String, ArrayList<Kmer_occur>>();
 		for (int j = 0; j < reads.size(); j++)
 		{
@@ -847,7 +920,7 @@ public class DataSet {
                             count1 = 0;
                          }
                                                  
-                         String exPath = "fams"+File.separator+"fams 0 0 200 " + "kmer" + count + "data ."+ File.separator;
+                         String exPath = "fams"+File.separator+"fams.exe 0 0 200 " + "kmer" + count + "data ."+ File.separator;
 			 p=run.exec(exPath); 
 //			 p=run.exec("fams 0 0 200 " + "kmer" + count + "data .\\"); 
 			 try {
@@ -1765,7 +1838,7 @@ public class DataSet {
 					fw.write(">" + r.name + "_" + i + "\n" + s + "\n");
 		}
 		fw.close();
-	}	
+	}
 	public void PrintHaplotypes(String outfile) throws IOException
 	{
 		FileWriter fw = new FileWriter(outfile);
@@ -1845,6 +1918,15 @@ public class DataSet {
 		for (Read r : reads)
 		{
 			fw.write(">" + r.name + "_" + r.frequency + "\n" + r.nucl + "\n");		
+		}
+		fw.close();
+	}
+        public void PrintUniqueReadsWithTagGenotype(String outfile, String tag) throws IOException
+	{
+		FileWriter fw = new FileWriter(outfile);
+		for (int i = 0; i < reads.size(); i++)
+		{
+			fw.write(">" + tag + "_" + (i+1) + "_" + reads.get(i).genotype + "_" + reads.get(i).frequency + "\n" + reads.get(i).nucl + "\n");		
 		}
 		fw.close();
 	}
@@ -2711,6 +2793,27 @@ public class DataSet {
                         System.out.println("RevComp: read "+i + "/" + reads.size());                            
                   }
         }
+        void fixDirectionGenotypingRefParallel(DataSet refs, int gapop, int gapext) throws InterruptedException, ExecutionException
+        {
+                 List< Future > futuresList = new ArrayList< Future >();
+                 int nrOfProcessors = Runtime.getRuntime().availableProcessors();
+                 ExecutorService eservice = Executors.newFixedThreadPool(nrOfProcessors);
+                 
+		 for (Read r : reads)
+		 {
+                        RevCompGenTask rt = new RevCompGenTask(r,refs,gapop,gapext);
+                        futuresList.add(eservice.submit(rt));
+			 
+		 }
+                  Object taskResult;
+                  int i = 0;
+                  for(Future future:futuresList) 
+                  {
+                        i++;
+                        taskResult = future.get();
+                        System.out.println("RevComp: read "+i + "/" + reads.size());                            
+                  }
+        }
         void fixDirectionRef(DataSet refs, int gapop, int gapext) throws InterruptedException, ExecutionException, IOException
         {
                  int i = 1;
@@ -2996,6 +3099,14 @@ public class DataSet {
                     return true;
             
             return false;
+        }
+        public String containReadGetName(Read s)
+        {
+            for (Read r : reads)
+                if (r.nucl.equalsIgnoreCase(s.nucl))
+                    return r.name;
+            
+            return "";
         }
          public boolean containReadAlignment(Read s) throws IOException
         {

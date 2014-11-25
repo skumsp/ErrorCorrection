@@ -65,7 +65,8 @@ public class ClustTask implements Callable {
 //                         System.in.read();
                          
                          String exPath = File.separator + addrFAMS + "fams"+File.separator+"fams.exe 0 0 200 " + "kmer" + count + "data" + clustID + " ."+ File.separator;
-			 p=run.exec(exPath); 
+//			 String exPath = "fams"+File.separator+"fams.exe 0 0 200 " + "kmer" + count + "data" + clustID + " ."+ File.separator;
+                         p=run.exec(exPath); 
 			 try {
 				p.waitFor();
 			} catch (InterruptedException e) {

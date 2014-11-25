@@ -5,6 +5,7 @@
 
 package ErrorCorrection;
 
+import ErrorCorrection.DataSet;
 import java.io.IOException;
 
 /**

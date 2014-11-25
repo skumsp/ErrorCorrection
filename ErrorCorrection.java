@@ -3,6 +3,7 @@ package ErrorCorrection;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.StringTokenizer;
 import java.util.concurrent.ExecutionException;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
@@ -211,7 +212,7 @@ public class ErrorCorrection {
                 String refFile_name = fl_ref.getPath();
                 
                 
-                DataSet refs = new DataSet(refFile_name);
+                DataSet refs = new DataSet(refFile_name,'c');
                 
                 int gapop = 15;
                 int gapext = 6;
@@ -243,6 +244,9 @@ public class ErrorCorrection {
 
                     String dset_file = list_files[i].getPath();
                     String dset_file_name = list_files[i].getName();
+                    
+                    StringTokenizer st = new StringTokenizer(dset_file_name,".");
+                    String tag = st.nextToken();
 
                     DataSet ds = new DataSet(dset_file);
                     ds.setK(k);
@@ -252,7 +256,7 @@ public class ErrorCorrection {
                     ds.setFindErrorsSeglen(errorsseglen);
                     ds.setFileNameShort(dset_file_name);
                     
-                    ds.fixDirectionRefParallel(refs, gapop, gapext);
+                    ds.fixDirectionGenotypingRefParallel(refs, gapop, gapext);
 
                     Corrector cr = new Corrector(ds);
                     cr.setMaxz(maxz);
@@ -268,7 +272,8 @@ public class ErrorCorrection {
                     cr.run();
                     ds = cr.CorrectedReads();
 
-                    ds.PrintCorrectedReads(outFolder + File.separator +dset_file_name+"_corrected.fas");
+//                    ds.PrintCorrectedReads(outFolder + File.separator +dset_file_name+"_corrected.fas");
+//                    ds.PrintUniqueReadsWithTagGenotype(outFolder + File.separator +dset_file_name+"_corrected.fas", tag);
                     System.out.println("Finished stage 1!");
 
 
@@ -283,7 +288,9 @@ public class ErrorCorrection {
                     int toFindHapl_postp = 1;
                     boolean toCalcHapl_postp = true;
 
-                    ds = new DataSet(dset_file);
+//                    ds = new DataSet(dset_file);
+                    ds = new DataSet(ds);
+                    ds.freqThr = -1;
                     ds.setK(k);
                     ds.setAvProc(nProc);
                     ds.setLenThr(lt);
@@ -307,7 +314,8 @@ public class ErrorCorrection {
                     cr.run();
                     ds = cr.CorrectedReads();
 
-                    ds.PrintCorrectedReads(dset_file+"_corrected.fas");
+//                    ds.PrintCorrectedReads(dset_file+"_corrected.fas");
+                    ds.PrintUniqueReadsWithTagGenotype(dset_file+"_corrected.fas", tag);
                     if (toFindHapl_postp == 1)
                     {
                         ds.PrintHaplotypes(dset_file+"_haplotypes.fas");

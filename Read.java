@@ -24,6 +24,7 @@ public class Read extends Sequence {
 	int frequency;
 	Correction[] corrections;
 	int[] NuclType;
+        String genotype;
 	public Read(String s)
 	{
 		super(s);
@@ -31,6 +32,7 @@ public class Read extends Sequence {
 		errorRegions = new ArrayList<ErrorRegion>();
 		corrections = new Correction[this.getLength()];
 		NuclType = new int[nucl.length()];
+                genotype = "";
 	}
 	public Read(String s, int f)
 	{
@@ -40,6 +42,7 @@ public class Read extends Sequence {
 		frequency = f;
 		corrections = new Correction[this.getLength()];
 		NuclType = new int[nucl.length()];
+                genotype = "";
 	}
 	public Read(String s, String n)
 	{
@@ -49,6 +52,7 @@ public class Read extends Sequence {
 		errorRegions = new ArrayList<ErrorRegion>();
 		corrections = new Correction[this.getLength()];
 		NuclType = new int[nucl.length()];
+                genotype = "";
 	}
 	public Read(String s, String n, int f)
 	{
@@ -59,6 +63,18 @@ public class Read extends Sequence {
 		errorRegions = new ArrayList<ErrorRegion>();
 		corrections = new Correction[this.getLength()];
 		NuclType = new int[nucl.length()];
+                genotype = "";
+	}
+        public Read(String s, String n, int f, String g)
+	{
+		super(s);
+		name = n;
+		frequency = f;
+		kmers = new ArrayList<Kmer>();
+		errorRegions = new ArrayList<ErrorRegion>();
+		corrections = new Correction[this.getLength()];
+		NuclType = new int[nucl.length()];
+                genotype = new String(g);
 	}
 	void addKmer(Kmer k)
 	{
@@ -534,6 +550,10 @@ public class Read extends Sequence {
                      if (this.nucl.charAt(i) != '-')
                          s+=this.nucl.charAt(i);
                  this.nucl = s;
+        }
+        public void setGenotype(String g)
+        {
+            genotype = new String(g);
         }
                 
 }

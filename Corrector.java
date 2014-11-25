@@ -423,6 +423,8 @@ public class Corrector {
                 ito = (int) (rt.totalMemory()/mb);
                 ifr = (int) (rt.freeMemory()/mb);
                 usedmemory.add(ito - ifr);
+                
+                ds = new DataSet(ds);
 
                 System.out.println("Thresholds: " + thresholds);
                 System.out.println("Errors: " + nErrors);
