@@ -1926,7 +1926,7 @@ public class DataSet {
 		FileWriter fw = new FileWriter(outfile);
 		for (int i = 0; i < reads.size(); i++)
 		{
-			fw.write(">" + tag + "_" + (i+1) + "_" + reads.get(i).genotype + "_" + reads.get(i).frequency + "\n" + reads.get(i).nucl + "\n");		
+			fw.write(">" + tag + "_"  + reads.get(i).genotype + "_" + (i+1) + "_" + reads.get(i).frequency + "\n" + reads.get(i).nucl + "\n");		
 		}
 		fw.close();
 	}

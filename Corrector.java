@@ -443,7 +443,7 @@ public class Corrector {
  //               d = findClosestHapl(refr,15,6.6);
 
                 String logfilename = outfolder + File.separator + ds.file_name_short + "_log.txt";
-                FileWriter fw = new FileWriter(logfilename);
+                FileWriter fw = new FileWriter(logfilename, true);
                 fw.write("Thresholds: " + thresholds + "\n");
                 fw.write("Errors: " + nErrors + "\n");
                 fw.write("MaxReadslen: " + maxReadsLen+ "\n");
@@ -458,6 +458,7 @@ public class Corrector {
                 fw.write("KmersSizes: " + kmerssizes+ "\n");
                 fw.write("UsedMemory: " + usedmemory+ "\n");
                 fw.write("NCutted: " + Ncutted+ "\n");
+                fw.write("--------\n");
                 fw.close();
 	}
 	DataSet CorrectedReads()

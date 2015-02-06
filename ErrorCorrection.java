@@ -284,6 +284,7 @@ public class ErrorCorrection {
                     boolean toDelUncor_postp = true;
                     boolean toPostprocessHeur_postp = false; //???
                     dset_file = outFolder + File.separator +dset_file_name+"_corrected.fas";
+                    String dset_file_name_short = dset_file_name;
                     dset_file_name = dset_file_name+"_corrected.fas";
                     int toFindHapl_postp = 1;
                     boolean toCalcHapl_postp = true;
@@ -296,7 +297,7 @@ public class ErrorCorrection {
                     ds.setLenThr(lt);
                     ds.setMaxAllErrorsPerc(mErPerc);
                     ds.setFindErrorsSeglen(errorsseglen);
-                    ds.setFileNameShort(dset_file_name);
+                    ds.setFileNameShort(dset_file_name_short);
                     int minNReads_postp = 1;
 
 
