@@ -247,6 +247,8 @@ public class ErrorCorrection {
                     
                     StringTokenizer st = new StringTokenizer(dset_file_name,".");
                     String tag = st.nextToken();
+                    
+                    String interName = "";
 
                     DataSet ds = new DataSet(dset_file);
                     ds.setK(k);

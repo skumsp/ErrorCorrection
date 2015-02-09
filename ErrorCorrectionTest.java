@@ -20,8 +20,50 @@ public class ErrorCorrectionTest {
                 int toFindHapl = Integer.parseInt(args[4]);
                 int errorsseglen = Integer.parseInt(args[5]);*/
                 
-                String folder_name  = "input";
+                String folder_name_input  = "input";
                 String outFolder = "output";
+                File fl = new File(folder_name_input);
+                
+                String folder_name  = fl.getPath();
+                if (outFolder.length()  == 0)
+                    outFolder = folder_name;
+                else
+                {
+                    File f = new File(outFolder);
+                    f.mkdir();
+                }
+                File fl_ref = new File("ref_HVR1.fas");
+                
+                String refFile_name = fl_ref.getPath();
+                
+                
+                
+                DataSet refs = new DataSet(refFile_name,'c');
+                
+                int gapop = 15;
+                int gapext = 6;
+                int dominparamgen = 25;
+                int dominparampostpr = 25; //30
+                int k = 25;
+                int nIter = 3;
+                int errorsseglen = 0;
+                int toFindHapl = 1;
+                int nProc = Runtime.getRuntime().availableProcessors();
+                String alignmethod = ""; // "Muscle" or "Clustal"
+                int lt = 50;
+	
+                    
+		int mErPerc = 50;
+		int toClust = 1;
+                int minNReads = 10;
+                boolean toPrintStat = false;
+
+                int maxz = 3;
+		int kmin = k-15;
+		boolean toCalcHapl = false;
+                boolean toDelUncor = false;
+                boolean toPostprocessHeur = false; 
+                
                 
                 File folder = new File(folder_name);
                 
@@ -30,57 +72,19 @@ public class ErrorCorrectionTest {
                     System.out.println("No such folder");
                     System.exit(1);
                 }
-                
-                if (outFolder.length()  == 0)
-                    outFolder = folder_name;
-                else
-                {
-                    File f = new File(outFolder);
-                    f.mkdir();
-                }
-                
                 File[] list_files = folder.listFiles();
                 
                 for (int i = 0; i < list_files.length; i++)
                 {
                     
-                    int k = 25;
-                    int lt = 50;
-                    int nIter = 3;
-                    int toFindHapl = 1;
-                    int errorsseglen = 0;
-//                    String refFile_name = "G:" + File.separator + "AMD_outbreak" + File.separator + "test" + File.separator + "ref_HVR1.fas";
-                
-//                    DataSet refs = new DataSet(refFile_name);
-
-                    int gapop = 15;
-                    int gapext = 6;
-
-
-                    int mErPerc = 50;
-                    int toClust = 1;
-                    int dominparamonenucl = 5;
-                    int nucldiffparam = 1;
-                    int dominparamgen = 25;
-                    int dominparampostpr = 25; //30
-                    int minNReads = 10;
-                    int nProc = Runtime.getRuntime().availableProcessors();
-                    boolean toPrintStat = false;
-
-                    int maxz = 3;
-                    int kmin = k-15;
-                    boolean toCalcHapl = false;
-                    boolean toDelUncor = false;
-                    boolean toPostprocessHeur = false; 
-                    
-                    DataSet refs = new DataSet("ref_HVR1.fas",'c');
-
 
                     String dset_file = list_files[i].getPath();
                     String dset_file_name = list_files[i].getName();
                     
                     StringTokenizer st = new StringTokenizer(dset_file_name,".");
                     String tag = st.nextToken();
+                    
+                    String interName = "";
 
                     DataSet ds = new DataSet(dset_file);
                     ds.setK(k);
@@ -90,7 +94,7 @@ public class ErrorCorrectionTest {
                     ds.setFindErrorsSeglen(errorsseglen);
                     ds.setFileNameShort(dset_file_name);
                     
-                    ds.fixDirectionRefParallel(refs, gapop, gapext);
+                    ds.fixDirectionGenotypingRefParallel(refs, gapop, gapext);
 
                     Corrector cr = new Corrector(ds);
                     cr.setMaxz(maxz);
@@ -118,6 +122,7 @@ public class ErrorCorrectionTest {
                     boolean toDelUncor_postp = true;
                     boolean toPostprocessHeur_postp = false; //???
                     dset_file = outFolder + File.separator +dset_file_name+"_corrected.fas";
+                    String dset_file_name_short = dset_file_name;
                     dset_file_name = dset_file_name+"_corrected.fas";
                     int toFindHapl_postp = 1;
                     boolean toCalcHapl_postp = true;
@@ -130,7 +135,7 @@ public class ErrorCorrectionTest {
                     ds.setLenThr(lt);
                     ds.setMaxAllErrorsPerc(mErPerc);
                     ds.setFindErrorsSeglen(errorsseglen);
-                    ds.setFileNameShort(dset_file_name);
+                    ds.setFileNameShort(dset_file_name_short);
                     int minNReads_postp = 1;
 
 
@@ -163,9 +168,9 @@ public class ErrorCorrectionTest {
 
                     System.out.println("Finished stage 2!");
                 }
-
-
                 System.exit(0);
+
+                                
     }
 
 }
