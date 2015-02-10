@@ -84,7 +84,17 @@ public class ErrorCorrectionTest {
                     StringTokenizer st = new StringTokenizer(dset_file_name,".");
                     String tag = st.nextToken();
                     
-                    String interName = "";
+                    boolean isGhost = dset_file_name.contains("[");
+                    String ghostpref = "";
+                    String ghostsuff = "";
+                    if (isGhost)
+                    {
+                        StringTokenizer stG = new StringTokenizer(dset_file_name,"[]");
+                        ghostpref = stG.nextToken();
+                        tag = stG.nextToken();
+                        ghostsuff = stG.nextToken();
+                    }
+
 
                     DataSet ds = new DataSet(dset_file);
                     ds.setK(k);
@@ -121,9 +131,17 @@ public class ErrorCorrectionTest {
                     boolean toPrintStat_postp = false;
                     boolean toDelUncor_postp = true;
                     boolean toPostprocessHeur_postp = false; //???
-                    dset_file = outFolder + File.separator +dset_file_name+"_corrected.fas";
+                    
                     String dset_file_name_short = dset_file_name;
-                    dset_file_name = dset_file_name+"_corrected.fas";
+                    String dset_file_seqs = outFolder + File.separator +tag+"_corrected.fas";
+                    String dset_file_hapl = outFolder + File.separator +tag+"_haplotypes.fas";
+                    
+                    if (isGhost)
+                    {
+                         dset_file_seqs = outFolder + File.separator +ghostpref + "[" + tag+"_corrected.fas]" + ghostsuff;
+                         dset_file_hapl = outFolder + File.separator +ghostpref + "[" + tag+"_haplotypes.fas]" + ghostsuff;;
+                    }
+                    
                     int toFindHapl_postp = 1;
                     boolean toCalcHapl_postp = true;
 
@@ -154,10 +172,10 @@ public class ErrorCorrectionTest {
                     ds = cr.CorrectedReads();
 
 //                    ds.PrintCorrectedReads(dset_file+"_corrected.fas");
-                    ds.PrintUniqueReadsWithTagGenotype(dset_file+"_corrected.fas", tag);
+                    ds.PrintUniqueReadsWithTagGenotype(dset_file_seqs, tag);
                     if (toFindHapl_postp == 1)
                     {
-                        ds.PrintHaplotypes(dset_file+"_haplotypes.fas");
+                        ds.PrintHaplotypes(dset_file_hapl);
     /*                    cr.postprocessHaplotypes(dset_file_name+"_haplotypes.fas",15,6.6,dominparampostpr);
                         cr.printRevComp(dset_file_name +"_haplotypes.fas_postprocessed.fas");
                         System.out.println(dset_file_name);
