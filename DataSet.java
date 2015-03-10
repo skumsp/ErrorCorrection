@@ -2494,7 +2494,7 @@ public class DataSet {
 		fr.close();
                 fw.close();
         }
-        void calculateRealErrorsStat(String ref, int homoplen, double gapop, double gapext) throws IOException
+         void calculateRealErrorsStat(String ref, int homoplen, double gapop, double gapext) throws IOException
         {
             Read clone = (new DataSet(ref)).reads.get(0);
             clone.name = "Clone";
@@ -2504,10 +2504,10 @@ public class DataSet {
                 fw.write("homop" + i + " ");
             fw.write("allerr nreplat nreplac nreplag nrepltc nrepltg nreplgc" + "\n");
             FileWriter fw_un = new FileWriter(this.file_name + "_" + ref + "_realerrorsun.txt");
-            fw_un.write("read freq len averrorsdist repl ins del ");
+/*            fw_un.write("read freq len averrorsdist repl ins del ");
             for (int i = 1; i <= homoplen; i++)
                 fw_un.write("homop" + i + " ");
-            fw_un.write("allerr nreplat nreplac nreplag nrepltc nrepltg nreplgc" + "\n");
+            fw_un.write("allerr nreplat nreplac nreplag nrepltc nrepltg nreplgc" + "\n");*/
             
             
             for (Read r : reads)
@@ -2693,7 +2693,7 @@ public class DataSet {
                     for (int i = 1; i <= homoplen; i++)
                         fw.write(errors[i]*r.frequency + " ");
                     fw.write(allerr*r.frequency + " " + nreplat*r.frequency + " " + nreplac*r.frequency + " " + nreplag*r.frequency + " " + nrepltc*r.frequency + " " + nrepltg*r.frequency + " " + nreplgc*r.frequency + "\n");
-                    fw_un.write(r.name + " " + r.frequency + " " +r.getLength() + " " + averrorsdist + " " + nrepl + " " + nins + " " + ndel + " ");
+                    fw_un.write(r.frequency + " " +r.getLength() + " " + averrorsdist + " " + nrepl + " " + nins + " " + ndel + " ");
                     for (int i = 1; i <= homoplen; i++)
                         fw_un.write(errors[i] + " ");
                     fw_un.write(allerr + " " + nreplat+ " " + nreplac+ " " + nreplag+ " " + nrepltc+ " " + nrepltg+ " " + nreplgc + "\n");
