@@ -19,7 +19,7 @@ import org.biojava3.core.sequence.compound.NucleotideCompound;
 
 public class Read extends Sequence {
 	public String name;
-	ArrayList<Kmer> kmers;
+	public ArrayList<Kmer> kmers;
 	ArrayList<ErrorRegion> errorRegions;
 	int frequency;
 	Correction[] corrections;
@@ -554,6 +554,14 @@ public class Read extends Sequence {
         public void setGenotype(String g)
         {
             genotype = new String(g);
+        }
+        public String getSeqNoGaps()
+        {
+             String s = "";
+                 for (int i = 0; i < this.nucl.length(); i++)
+                     if (this.nucl.charAt(i) != '-')
+                         s+=this.nucl.charAt(i);
+                 return s;
         }
                 
 }

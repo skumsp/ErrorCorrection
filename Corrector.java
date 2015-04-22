@@ -1172,7 +1172,7 @@ public class Corrector {
                 {
                     Runtime run=Runtime.getRuntime();
                     Process p=null;
-                    String s = "ClustalW2//clustalw2 -INFILE=" +addr + " -OUTFILE=" + addr+"_allign.fas";
+                    String s = "ClustalW2" + File.separator + "clustalw2 -INFILE=" +addr + " -OUTFILE=" + addr+"_allign.fas";
                     s+= " -OUTPUT=FASTA -DNAMATRIX=IUB -GAPOPEN=" + gapop +" -GAPEXT=" + gapext + " -TYPE=DNA -PWDNAMATRIX=IUB -PWGAPOPEN=" + gapop+ " -PWGAPEXT=" + gapext;
 
                     p = run.exec(s);
@@ -3453,6 +3453,7 @@ public class Corrector {
                hapl = new DataSet(addr);
            else
                hapl = new DataSet(addr,idmethod);
+           nIntRef = Math.min(nIntRef, hapl.reads.size());
            ArrayList<Read> refs = hapl.FindMostFreqReads(nIntRef);
            HashMap<Read,DataSet> closeRef = new HashMap<Read,DataSet>();
            
@@ -3470,11 +3471,13 @@ public class Corrector {
 //                    System.out.println(countref);
                     Runtime run=Runtime.getRuntime();
                     Process p=null;
-                    FileWriter fw_alin = new FileWriter("allign_input.fas");
+                    String alinpname = "allign_input_" + count + ".fas";
+                    String aloutname = "allign_output_" + count + ".fas";
+                    FileWriter fw_alin = new FileWriter(alinpname);
                     fw_alin.write(">" + "reference" + "\n" + r.nucl + "\n");
                     fw_alin.write(">" + h.name + "\n" + h.nucl + "\n");
                     fw_alin.close();
-                    String param = "ClustalW2//clustalw2 -INFILE=" +"allign_input.fas" + " -OUTFILE=" + "allign_output.fas";
+                    String param = "ClustalW2//clustalw2 -INFILE=" +alinpname + " -OUTFILE=" + aloutname;
                     param+= " -OUTPUT=FASTA -DNAMATRIX=IUB -GAPOPEN=" + gapop +" -GAPEXT=" + gapext + " -TYPE=DNA -PWDNAMATRIX=IUB -PWGAPOPEN=" + gapop+ " -PWGAPEXT=" + gapext;
                     p = run.exec(param);
                     BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -3487,12 +3490,12 @@ public class Corrector {
                     {
                         System.out.println("Error in allgnment program");
                     }
-                    DataSet alignment = new DataSet("allign_output.fas",'c');
-                    File f = new File("allign_input.fas");
+                    DataSet alignment = new DataSet(aloutname,'c');
+                    File f = new File(alinpname);
                     f.delete();
-                    f = new File("allign_output.fas");
+                    f = new File(aloutname);
                     f.delete();
-                    f = new File("allign_input.dnd");
+                    f = new File("allign_input_" + count + ".dnd");
                     f.delete();
                     
                     int l = alignment.reads.get(0).getLength();

@@ -37,13 +37,13 @@ public static void main(String[] args) throws IOException, InterruptedException 
                 boolean toPostprocessHeur = false; //???
                 
                 
-            String folder_name = "Palmer";
+            String folder_name = "primer_removed";
             File folder = new File(folder_name);
             System.out.println(folder.exists());
             File[] list_files = folder.listFiles();
             
-            double gapop = 0;
-            double gapext = 0;
+            double gapop = 6;
+            double gapext = 2;
             
             for (int i = 0; i < list_files.length; i++)
             {
@@ -66,6 +66,8 @@ public static void main(String[] args) throws IOException, InterruptedException 
                     String idMethod = "ET";
                         cr.postprocessHaplotypes(dset_file_name,gapop,gapext,dominparampostpr,idAlignAlg,idMethod);
                         System.out.println(dset_file_name);
+                        gapop = 0;
+                        gapext = 0;
                         ncorrections = cr.postprocessHaplotypesPairwise(dset_file_name +"_postprocessed.fas", gapop, gapext, dominparamonenucl, dominparamgen, nucldiffparam,idAlignAlg,idMethod);
                         dset_file_name = dset_file_name+"_postprocessed.fas_PostprocPair.fas";
 
