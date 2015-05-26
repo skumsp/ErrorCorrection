@@ -19,7 +19,7 @@ import org.biojava3.core.sequence.compound.NucleotideCompound;
 
 public class Read extends Sequence {
 	public String name;
-	ArrayList<Kmer> kmers;
+	public ArrayList<Kmer> kmers;
 	ArrayList<ErrorRegion> errorRegions;
 	int frequency;
 	Correction[] corrections;
@@ -506,6 +506,15 @@ public class Read extends Sequence {
                     d++;
             return d;
         }
+        public int calcHammingDistIgnoreGaps(Read r)
+        {
+            int d = 0;
+            int m = Math.min(this.getLength(), r.getLength());
+            for (int i = 0; i < m; i++)
+                if ( (this.getNucl(i) != r.getNucl(i)) && (this.getNucl(i) != '-') && (r.getNucl(i) != '-'))
+                    d++;
+            return d;
+        }
         public void setFrequency(int f)
         {
             frequency = f;
@@ -554,6 +563,53 @@ public class Read extends Sequence {
         public void setGenotype(String g)
         {
             genotype = new String(g);
+        }
+        public String getSeqNoGaps()
+        {
+             String s = "";
+                 for (int i = 0; i < this.nucl.length(); i++)
+                     if (this.nucl.charAt(i) != '-')
+                         s+=this.nucl.charAt(i);
+                 return s;
+        }
+        public void clipToRefFillGaps(Read ref, int gapop, int gapext)
+        {
+                DNASequence read = new DNASequence(this.nucl,
+				AmbiguityDNACompoundSet.getDNACompoundSet());
+		DNASequence refer = new DNASequence(ref.nucl,
+				AmbiguityDNACompoundSet.getDNACompoundSet());
+ 
+		SubstitutionMatrix<NucleotideCompound> matrix = SubstitutionMatrixHelper.getNuc4_4();
+ 
+		SimpleGapPenalty gapP = new SimpleGapPenalty();
+		gapP.setOpenPenalty((short)gapop);
+		gapP.setExtensionPenalty((short)gapext);
+ 
+		SequencePair<DNASequence, NucleotideCompound> psa =
+				Alignments.getPairwiseAlignment(read, refer,
+						PairwiseSequenceAlignerType.LOCAL, gapP, matrix);
+                
+                int st = 1;
+                while (psa.hasGap(st))
+                    st++;
+                int end = psa.getLength();
+                while (psa.hasGap(end))
+                    end--;
+                
+                System.out.println(psa);
+                
+                String newNucl = "";
+                for (int i = st; i <= end; i++)
+                {
+                    NucleotideCompound nc = psa.getCompoundAt(1, i);
+                    String b = nc.getBase();
+                    if (b.equalsIgnoreCase("-"))
+                        newNucl += psa.getCompoundAt(2,i);
+                    else
+                        newNucl += psa.getCompoundAt(1,i);
+                }
+                this.nucl = newNucl; 
+                
         }
                 
 }

@@ -6,41 +6,78 @@
 package ErrorCorrection;
 
 import ErrorCorrection.DataSet;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.StringTokenizer;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  *
  * @author kki8
  */
-public class CalcRealErrorsStatRun {
-    public static void main(String[] args) throws IOException, InterruptedException {
+public class CalcRealErrorsStatRun 
+{
+    public static void main(String[] args) throws IOException, InterruptedException, ExecutionException 
+    {
+                String refName = "ref_clones_no_primers.fas";
+                DataSet ds2 = new DataSet(refName,'c');
+                ds2.PrintReadsSeparateFiles();
+                
+                
+                String cloneMIDaddr = "clonesMID.txt";
+                BufferedReader br = new BufferedReader(new FileReader(cloneMIDaddr));
+                HashMap<Integer,Integer> hm = new HashMap();
+                String s = br.readLine();
+                while (s!=null)
+                {
+                    StringTokenizer st = new StringTokenizer(s," \t");
+                    int clone = Integer.parseInt(st.nextToken());
+                    int mid = Integer.parseInt(st.nextToken());
+                    hm.put(mid, clone);
+                    s = br.readLine();
+                }
+                
+                File folder = new File("Illumina_no_chimeras");
+                File[] list_files = folder.listFiles();
+                
+                List< Future > futuresList = new ArrayList< Future >(list_files.length);
+                int nrOfProcessors = Runtime.getRuntime().availableProcessors();
+                ExecutorService eservice = Executors.newFixedThreadPool(nrOfProcessors);
 
-        
-        int nSample = 8;
-                DataSet ds1 = new DataSet("S" + nSample + ".fas");
-//                ds1.findHaplotypes();
-//                ds1.PrintHaplotypes("S1_hapl.fas");
-
-//               String addr_pattern = "Unique_clones_by_timepoint.fas";
-               String addr_pattern = "S" + nSample + "_strangeHapl.fas";
-        
-              
-              DataSet ds = new DataSet(addr_pattern);
-//              ds.PrintReadsSeparateFiles();
-              int k = ds.reads.size();
-              ds.PrintReadsSeparateFilesKeepName(addr_pattern);
-              for (int j = 1; j <=1;j++)
-              {
-//                  String address = "RL" + j + ".fas";
-                  String address = "S" + nSample + ".fas";
-                  ds = new DataSet(address);
-                  for (int i = 1; i <= k; i++)
+                for (int i = 0; i < list_files.length; i++)
+                {
+                    String dset_file = list_files[i].getPath();
+                    String dset_file_name = list_files[i].getName();
+                    StringTokenizer st = new StringTokenizer(dset_file_name,"_-");
+                    for (int j = 1; j<=2; j++)
+                        st.nextToken();
+                    s = st.nextToken().substring(1);
+                    int mid = Integer.parseInt(s);
+                    int clone = hm.get(mid);
+                    
+                    String cloneFile = refName + "_" + clone + ".seq.fas";
+                    DataSet ds = new DataSet(dset_file,"ET");
+                    calcRealErrorsTask ts = new calcRealErrorsTask(ds,cloneFile);
+                    futuresList.add(eservice.submit(ts));
+ //                   ds.fixDirectionGenotypingRefParallel(refs, 15, 6);
+ //                   ds.calculateRealErrorsStat(cloneFile, 10, 15, 6.6);
+ //                   ds.PrintUniqueReads(dset_file + "_unique.fas");
+                }
+                
+                 
+                  Object taskResult;
+                  for(Future future:futuresList) 
                   {
-    //                ds.PrintReadsSeparateFiles();
-                    ds.calculateRealErrorsStat(addr_pattern + "_Read" + i + ".fas", 10, 15, 6.6);
-
+                        taskResult = future.get();                          
                   }
-              }
+        
     }
-
 }

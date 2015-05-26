@@ -19,7 +19,7 @@ public class Sequence {
 	{
 		return nucl.length();
 	}
-	char getNucl(int i)
+	public char getNucl(int i)
 	{
 		return nucl.charAt(i);
 	}

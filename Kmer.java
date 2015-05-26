@@ -24,11 +24,11 @@ public class Kmer extends Sequence{
 	{
 		kCount = i;
 	}
-	int getKCount()
+	public int getKCount()
 	{
 		return kCount;
 	}
-	int getStartPos()
+	public int getStartPos()
 	{
 		return StartPos;
 	}

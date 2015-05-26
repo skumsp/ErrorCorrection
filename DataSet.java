@@ -364,6 +364,60 @@ public class DataSet {
 		reads.add(new Read(nucl, name));
 		fr.close();
 	}
+        public DataSet (String addr, char c, int minlen) throws IOException
+	{
+            // keep read name
+		lengthThr = minlen;
+		additionalfreqThrMult = 3;
+		maxAllErrorsPerc = 40;
+                finderrorsseglen = k;
+		reads = new ArrayList<Read>();
+		allKmers = new ArrayList<Kmer_general>();
+		haplotypes = new ArrayList<Haplotype>();
+		file_name = addr;
+		FileReader fr = new FileReader(addr);
+		BufferedReader br = new BufferedReader(fr);
+		
+		String s = br.readLine();
+                while(s.equalsIgnoreCase(""))
+                    s = br.readLine();
+		String nucl = new String();
+		String name = new String();
+		name = "";
+		int i = 1;
+		int j = s.length();
+		while ((i < s.length())&&(s.charAt(i)!=' '))
+		{
+			name+=s.charAt(i);
+			i++;
+		}
+		s = br.readLine();
+		while (s!= null)
+		{
+                        if (s.length() == 0)
+			{
+				s = br.readLine();
+				continue;
+			}
+			if(s.charAt(0) == '>')
+			{
+					reads.add(new Read(nucl, name));	
+					nucl = "";
+					name = "";
+					i = 1;
+					while ((i < s.length())&&(s.charAt(i)!=' '))
+					{
+						name+=s.charAt(i);
+						i++;
+					}
+			}
+			else
+				nucl+=s.toUpperCase();
+			s = br.readLine();
+		}
+		reads.add(new Read(nucl, name));
+		fr.close();
+	}
 	public DataSet(DataSet ds)
 	{
 		freqThr = ds.freqThr;
@@ -568,6 +622,7 @@ public class DataSet {
         public DataSet(String addr, String idmethod) throws FileNotFoundException, IOException
         {            
                 int ntokenfreqFromEnd = 1;
+                this.file_name = addr;
                 
                 reads = new ArrayList<Read>();
 		haplotypes = new ArrayList<Haplotype>();
@@ -1212,7 +1267,7 @@ public class DataSet {
                 }
 
 //                FileWriter fw1 = new FileWriter(dir + fol_sign + "kvalues_distribution1" +"(k=" + k + ")" +"("+dir+")"+ ".txt");
-                FileWriter fw1 = new FileWriter(dir + fol_sign + "kvalues_distribution1.txt");
+                FileWriter fw1 = new FileWriter(dir + File.separator + "kvalues_distribution1.txt");
 		for (int i = 1; i < valuesDistribution1.length; i++)
 			fw1.write(i + " " + valuesDistribution1[i] + " " + clust[i] +" "+ clust1[i] +" " + variations[i] + "\n");
 		fw1.close();
@@ -2504,10 +2559,10 @@ public class DataSet {
                 fw.write("homop" + i + " ");
             fw.write("allerr nreplat nreplac nreplag nrepltc nrepltg nreplgc" + "\n");
             FileWriter fw_un = new FileWriter(this.file_name + "_" + ref + "_realerrorsun.txt");
-            fw_un.write("read freq len averrorsdist repl ins del ");
+/*            fw_un.write("read freq len averrorsdist repl ins del ");
             for (int i = 1; i <= homoplen; i++)
                 fw_un.write("homop" + i + " ");
-            fw_un.write("allerr nreplat nreplac nreplag nrepltc nrepltg nreplgc" + "\n");
+            fw_un.write("allerr nreplat nreplac nreplag nrepltc nrepltg nreplgc" + "\n");*/
             
             
             for (Read r : reads)
@@ -2516,23 +2571,14 @@ public class DataSet {
                     System.out.println(r.name + "//" + reads.size());
                     Runtime run=Runtime.getRuntime();
                     Process p=null;
-                    FileWriter fw_alin = new FileWriter("allign_input.fas");
-                    String ncl = "";
-                    for (int i = r.nucl.length()-1; i>=0; i--)
-                    {
-                        if (r.nucl.charAt(i) == 'A')
-                               ncl+= "T";
-                        if (r.nucl.charAt(i) == 'T')
-                               ncl+="A";
-                        if (r.nucl.charAt(i) == 'G')
-                               ncl+="C";
-                        if (r.nucl.charAt(i) == 'C')
-                               ncl+="G";
-                    }
-                    fw_alin.write(">" + r.name + "\n" + ncl + "\n");
+                    String al_in = this.file_name + "_allign_input.fas";
+                    String al_out = this.file_name + "_allign_output.fas";
+                    FileWriter fw_alin = new FileWriter(al_in);
+
+                    fw_alin.write(">" + r.name + "\n" + r.nucl + "\n");
                     fw_alin.write(">" + clone.name + "\n" + clone.nucl + "\n");
                     fw_alin.close();
-                    String param = "ClustalW2//clustalw2 -INFILE=" +"allign_input.fas" + " -OUTFILE=" + "allign_output.fas";
+                    String param = "ClustalW2//clustalw2 -INFILE=" +al_in + " -OUTFILE=" + al_out;
                     param+= " -OUTPUT=FASTA -DNAMATRIX=IUB -GAPOPEN=" + gapop +" -GAPEXT=" + gapext + " -TYPE=DNA -PWDNAMATRIX=IUB -PWGAPOPEN=" + gapop+ " -PWGAPEXT=" + gapext;
                     p = run.exec(param);
                     BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -2545,7 +2591,7 @@ public class DataSet {
                     {
                         System.out.println("Error in allgnment program");
                     }
-                    DataSet alignment = new DataSet("allign_output.fas",'c');
+                    DataSet alignment = new DataSet(al_out,'c');
 /*                    File f = new File("allign_input.fas");
                     f.delete();
                     f = new File("allign_output.fas");
@@ -2693,7 +2739,7 @@ public class DataSet {
                     for (int i = 1; i <= homoplen; i++)
                         fw.write(errors[i]*r.frequency + " ");
                     fw.write(allerr*r.frequency + " " + nreplat*r.frequency + " " + nreplac*r.frequency + " " + nreplag*r.frequency + " " + nrepltc*r.frequency + " " + nrepltg*r.frequency + " " + nreplgc*r.frequency + "\n");
-                    fw_un.write(r.name + " " + r.frequency + " " +r.getLength() + " " + averrorsdist + " " + nrepl + " " + nins + " " + ndel + " ");
+                    fw_un.write(r.frequency + " " +r.getLength() + " " + averrorsdist + " " + nrepl + " " + nins + " " + ndel + " ");
                     for (int i = 1; i <= homoplen; i++)
                         fw_un.write(errors[i] + " ");
                     fw_un.write(allerr + " " + nreplat+ " " + nreplac+ " " + nreplag+ " " + nrepltc+ " " + nrepltg+ " " + nreplgc + "\n");
@@ -2793,7 +2839,7 @@ public class DataSet {
                         System.out.println("RevComp: read "+i + "/" + reads.size());                            
                   }
         }
-        void fixDirectionGenotypingRefParallel(DataSet refs, int gapop, int gapext) throws InterruptedException, ExecutionException
+        public void fixDirectionGenotypingRefParallel(DataSet refs, int gapop, int gapext) throws InterruptedException, ExecutionException
         {
                  List< Future > futuresList = new ArrayList< Future >();
                  int nrOfProcessors = Runtime.getRuntime().availableProcessors();
@@ -2927,7 +2973,7 @@ public class DataSet {
             int i = 1;
             for (Read r : reads)
             {
-                FileWriter fw = new FileWriter(this.file_name + "_Read" + i + ".fas");
+                FileWriter fw = new FileWriter(this.file_name + "_" + r.name + ".fas");
                 fw.write(">" + r.name + "\n" + r.nucl + "\n");
                 fw.close();
                 i++;
@@ -3189,4 +3235,115 @@ public class DataSet {
                         break;
                     }
           }
+         public void clipToRefFillGaps(DataSet refs, int gapop, int gapext) throws IOException
+        {
+                 int i = 1;
+		 for (Read r : reads)
+		 {
+                    System.out.println("Clipping: read "+i + "/" + reads.size()); 
+                    i++;
+                     
+                    int bestDist = Integer.MAX_VALUE;
+                    Read bestRef = null;
+                    for (Read ref : refs.reads)
+                    {
+                        int dDir = r.calcEditDistAbsAlignWithGaps(ref, gapop, gapext);
+                        if (dDir < bestDist)
+                        {
+                            bestDist = dDir;
+                            bestRef = ref;
+                        }
+                    }
+                    r.clipToRefFillGaps(bestRef, gapop, gapext);
+			 
+		 }
+        }
+         public void fillGapsConsensusAligned()
+         {
+             int l = reads.get(0).getLength();
+             char[] nucl = {'A','C','T','G'};
+             
+             String cons = "";
+             for (int i=0; i < l; i++)
+             {
+                 int[] freqNuclPos = new int[nucl.length];
+                 for (Read r : reads)
+                 {
+                     switch (r.getNucl(i))
+                     {
+                         case 'A':
+                                 freqNuclPos[0] += r.frequency;
+                                 break;
+                         case 'C':
+                                 freqNuclPos[1] += r.frequency;
+                                 break;
+                         case 'T':
+                                 freqNuclPos[2] += r.frequency;
+                                 break;
+                         case 'G':
+                                 freqNuclPos[3] += r.frequency;
+                                 break;
+                     }                                
+                 }
+                 int maxfreq = 0;
+                 char maxnucl = 'X';
+                 for (int j = 0; j < nucl.length; j++)
+                     if (freqNuclPos[j] > maxfreq)
+                     {
+                         maxfreq = freqNuclPos[j];
+                         maxnucl = nucl[j];
+                     }
+                 cons += maxnucl;
+             }
+             for (Read r : this.reads)
+             {
+                 String newnucl = "";
+                 for (int i = 0; i < r.getLength(); i++)
+                 {
+                     if (r.getNucl(i) == '-')
+                     {
+                         if (cons.charAt(i) != 'X')
+                            newnucl += cons.charAt(i);
+                     }
+                     else
+                     {
+                         newnucl += r.getNucl(i);
+                     }
+                 }
+                 r.nucl = newnucl;
+             }
+                     
+             
+         }
+         public void clipAligned(int stpos, int endpos)
+         {
+             HashMap<String,String> names = new HashMap();
+             HashMap<String,Integer> seq = new HashMap();
+             for (Read r : this.reads)
+             {
+                 String s = r.nucl.substring(stpos,endpos);
+                 if (seq.containsKey(s))
+                 {
+                     seq.put(s, seq.get(s) + r.frequency);
+                 }
+                 else
+                 {
+                     seq.put(s, r.frequency);
+                     names.put(s, r.name);
+                 }
+             }
+             ArrayList<Read> newReads = new ArrayList();
+             for (Map.Entry me : seq.entrySet())
+             {
+                 String nucl = (String) me.getKey();
+                 int freq = (Integer) me.getValue();
+                 String name = names.get(nucl);
+                 newReads.add(new Read(nucl,name,freq));
+             }
+             this.reads = newReads;
+         }
+         public void sortByFreq()
+         {
+             Collections.sort(reads, new ReadFreqComparator());
+         }
 }
