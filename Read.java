@@ -572,6 +572,7 @@ public class Read extends Sequence {
                          s+=this.nucl.charAt(i);
                  return s;
         }
+<<<<<<< HEAD
         public void clipToRefFillGaps(Read ref, int gapop, int gapext)
         {
                 DNASequence read = new DNASequence(this.nucl,
@@ -611,5 +612,7 @@ public class Read extends Sequence {
                 this.nucl = newNucl; 
                 
         }
+=======
+>>>>>>> origin/master
                 
 }
