@@ -31,7 +31,7 @@ public class DataSet {
         int avProc;
 	public DataSet (String addr) throws IOException
 	{
-		lengthThr = 50;
+		lengthThr = 100;
 		additionalfreqThrMult = 10;
 		maxAllErrorsPerc = 40;
                 freqThr = -1;
@@ -3345,5 +3345,25 @@ public class DataSet {
          public void sortByFreq()
          {
              Collections.sort(reads, new ReadFreqComparator());
+         }
+         public HashMap<String,DataSet> separateGenotypes()
+         {
+             HashMap<String,DataSet> hm = new HashMap();
+             for (Read r : this.reads)
+             {
+                 if (hm.containsKey(r.genotype))
+                 {
+                     DataSet ds = hm.get(r.genotype);
+                     ds.reads.add(r);
+                     hm.put(r.genotype, ds);
+                 }
+                 else
+                 {
+                     DataSet ds = new DataSet();
+                     ds.reads.add(r);
+                     hm.put(r.genotype, ds);
+                 }
+             }
+             return hm;
          }
 }

@@ -92,6 +92,16 @@ public class Corrector {
         }
 	void run() throws IOException, InterruptedException, ExecutionException
 	{
+                
+                if (this.ds.getNreads() < this.minNReads)
+                {
+                    String logfilename = outfolder + File.separator + ds.file_name_short + "_log.txt";
+                    FileWriter fw = new FileWriter(logfilename, true);
+                    fw.write("Too few reads \n");
+                    fw.close();
+                    return;
+                }
+            
 		ArrayList<Integer> nErrors = new ArrayList<Integer>();
 		ArrayList<Integer> maxReadsLen = new ArrayList<Integer>();
 		ArrayList<Integer> minReadsLen = new ArrayList<Integer>();
