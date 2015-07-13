@@ -61,7 +61,7 @@ public class ErrorCorrection {
                 int toFindHapl = 1;
                 int nProc = Runtime.getRuntime().availableProcessors();
                 String alignmethod = ""; // "Muscle" or "Clustal"
-                int lt = 100;
+                int lt = 220;
                 String outFolder = "";
                 
                 MutuallyExclusiveGroup group = parser.addMutuallyExclusiveGroup("Align");
@@ -263,6 +263,15 @@ public class ErrorCorrection {
                     }
 
                     DataSet ds = new DataSet(dset_file,lt);
+                    if (ds.reads.size() == 0)
+                    {
+                        String logfilename = outFolder + File.separator + tag + "_log.txt";
+                        FileWriter fw = new FileWriter(logfilename, true);
+                        fw.write("No long reads \n");
+                        fw.close();
+                        continue;
+                    }
+
                     ds.setK(k);
                     ds.setAvProc(nProc);
                     ds.setLenThr(lt);
@@ -277,7 +286,7 @@ public class ErrorCorrection {
                     {
                                                
                         String genot = (String) me.getKey();
-                        String dset_file_name_short = dset_file_name + "_" + genot;
+                        String dset_file_name_short = tag + "_" + genot;
                         ds = (DataSet) me.getValue();
                         ds.setK(k);
                         ds.setAvProc(1);
