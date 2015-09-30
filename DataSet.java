@@ -2818,6 +2818,67 @@ public class DataSet {
                     r.nucl = r.getRevComp().getNucl();
             }
         }
+        void fixDirection(Read ref, double gapop, double gapext) throws IOException
+        {
+            String s_ref = ref.getNucl();
+            for (Read r : reads)
+            {
+                System.out.println("Fixing direction: " + r.name);
+                int bestmatch = 0;
+                int bestdirect = -1;
+                String nucl = r.getNucl();
+                for (int i = 0; i <= 1; i++)
+                {
+                    Runtime run=Runtime.getRuntime();
+                    Process p=null;
+                    FileWriter fw_alin = new FileWriter("allign_input.fas");
+                    fw_alin.write(">" + r.name + "\n");
+                    fw_alin.write(nucl + "\n");
+                    fw_alin.write(">reference" + "\n");
+                    fw_alin.write(s_ref + "\n");
+                    fw_alin.close();
+                    String param = "ClustalW2//clustalw2 -INFILE=" +"allign_input.fas" + " -OUTFILE=" + "allign_output.fas";
+                    param+= " -OUTPUT=FASTA -DNAMATRIX=IUB -GAPOPEN=" + gapop +" -GAPEXT=" + gapext + " -TYPE=DNA -PWDNAMATRIX=IUB -PWGAPOPEN=" + gapop+ " -PWGAPEXT=" + gapext;
+
+                    p = run.exec(param);
+                    BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                    String s1;
+                    while ((s1 = stdInput.readLine()) != null) {
+    //                  System.out.println(s1);
+                    }
+                    if (p.exitValue()!= 0)
+                    {
+                        System.out.println("Error in allgnment program");
+                    }
+                    DataSet allignment = new DataSet("allign_output.fas",'c');
+                    String al_read = "";
+                    String al_ref = "";
+                    for (Read r1 : allignment.reads)
+                        if (!r1.name.contains("reference"))
+                            al_read = r1.getNucl();
+                        else
+                            al_ref = r1.getNucl();
+                    int match = 0;
+                    for (int j = 0; j < al_read.length(); j++)
+                        if (al_read.charAt(j) == al_ref.charAt(j))
+                            match++;
+                    if (match > bestmatch)
+                    {
+                        bestmatch = match;
+                        bestdirect = i;
+                    }
+                    File f = new File("allign_input.fas");
+                    f.delete();
+                    f = new File("allign_output.fas");
+                    f.delete();
+                    f = new File("allign_input.dnd");
+                    f.delete();
+                    nucl = r.getRevComp().getNucl();
+                }
+                if (bestdirect == 1)
+                    r.nucl = r.getRevComp().getNucl();
+            }
+        }
         void fixDirectionRefParallel(DataSet refs, int gapop, int gapext) throws InterruptedException, ExecutionException
         {
                  List< Future > futuresList = new ArrayList< Future >();
@@ -2843,6 +2904,7 @@ public class DataSet {
         {
                  List< Future > futuresList = new ArrayList< Future >();
                  int nrOfProcessors = Runtime.getRuntime().availableProcessors();
+//                 int nrOfProcessors = 1;
                  ExecutorService eservice = Executors.newFixedThreadPool(nrOfProcessors);
                  
 		 for (Read r : reads)
@@ -3366,4 +3428,51 @@ public class DataSet {
              }
              return hm;
          }
+         public void clipToRef(DataSet refs, int gapop, int gapext) throws IOException
+        {
+                 int i = 1;
+		 for (Read r : reads)
+		 {
+                    System.out.println("Clipping: read "+i + "/" + reads.size()); 
+                    i++;
+                     
+                    int bestDist = Integer.MAX_VALUE;
+                    Read bestRef = null;
+                    for (Read ref : refs.reads)
+                    {
+                        int dDir = r.calcEditDistAbsAlignWithGaps(ref, gapop, gapext);
+                        if (dDir < bestDist)
+                        {
+                            bestDist = dDir;
+                            bestRef = ref;
+                        }
+                    }
+                    r.clipToRef(bestRef, gapop, gapext);			 
+		 }
+                 
+                HashMap<String,String> names = new HashMap();
+                HashMap<String,Integer> seq = new HashMap();
+                for (Read r : this.reads)
+                {
+                    String s = r.nucl;
+                    if (seq.containsKey(s))
+                    {
+                        seq.put(s, seq.get(s) + r.frequency);
+                    }
+                    else
+                    {
+                        seq.put(s, r.frequency);
+                        names.put(s, r.name);
+                    }
+             }
+             ArrayList<Read> newReads = new ArrayList();
+             for (Map.Entry me : seq.entrySet())
+             {
+                 String nucl = (String) me.getKey();
+                 int freq = (Integer) me.getValue();
+                 String name = names.get(nucl);
+                 newReads.add(new Read(nucl,name,freq));
+             }
+             this.reads = newReads;
+        }
 }

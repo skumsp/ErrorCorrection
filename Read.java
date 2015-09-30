@@ -611,4 +611,41 @@ public class Read extends Sequence {
                 this.nucl = newNucl; 
                 
         }
+        public void clipToRef(Read ref, int gapop, int gapext)
+        {
+                DNASequence read = new DNASequence(this.nucl,
+				AmbiguityDNACompoundSet.getDNACompoundSet());
+		DNASequence refer = new DNASequence(ref.nucl,
+				AmbiguityDNACompoundSet.getDNACompoundSet());
+ 
+		SubstitutionMatrix<NucleotideCompound> matrix = SubstitutionMatrixHelper.getNuc4_4();
+ 
+		SimpleGapPenalty gapP = new SimpleGapPenalty();
+		gapP.setOpenPenalty((short)gapop);
+		gapP.setExtensionPenalty((short)gapext);
+ 
+		SequencePair<DNASequence, NucleotideCompound> psa =
+				Alignments.getPairwiseAlignment(read, refer,
+						PairwiseSequenceAlignerType.LOCAL, gapP, matrix);
+                
+                int st = 1;
+                while (psa.hasGap(st))
+                    st++;
+                int end = psa.getLength();
+                while (psa.hasGap(end))
+                    end--;
+                
+//                System.out.println(psa);
+                
+                String newNucl = "";
+                for (int i = st; i <= end; i++)
+                {
+                    NucleotideCompound nc = psa.getCompoundAt(1, i);
+                    String b = nc.getBase();
+                    if (!b.equalsIgnoreCase("-"))
+                        newNucl += psa.getCompoundAt(1,i);
+                }
+                this.nucl = newNucl; 
+                
+        }
 }
