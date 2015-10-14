@@ -41,8 +41,10 @@ public class RevCompGenTask implements Callable
        for (int i =0; i < refs.reads.size(); i++)
        {
             Read ref = refs.reads.get(i);
-            int dDir = r.calcEditDistAbsAlignWithGaps(ref, gapop, gapext);
-            int dRev = r.getRevComp().calcEditDistAbsAlignWithGaps(ref, gapop, gapext);
+//            int dDir = r.calcEditDistAbsAlignWithGaps(ref, gapop, gapext);
+//            int dRev = r.getRevComp().calcEditDistAbsAlignWithGaps(ref, gapop, gapext);
+            int dDir = (int) r.calcEditDistAbsAlign(ref, gapop, gapext);
+            int dRev = (int) r.getRevComp().calcEditDistAbsAlign(ref, gapop, gapext);
             bestDist = Math.min(bestDist, dDir);
             bestDist = Math.min(bestDist, dRev);
             if (dDir == bestDist)

@@ -23,8 +23,8 @@ public class ErrorCorrectionTest {
                 int toFindHapl = Integer.parseInt(args[4]);
                 int errorsseglen = Integer.parseInt(args[5]);*/
                 
-                String folder_name_input  = "Gilberto";
-                String outFolder = "Gilberto_output";
+                String folder_name_input  = "Thailand";
+                String outFolder = "Thailand_output";
                 File fl = new File(folder_name_input);
                 
                 String folder_name  = fl.getPath();
@@ -35,7 +35,7 @@ public class ErrorCorrectionTest {
                     File f = new File(outFolder);
                     f.mkdir();
                 }
-                File fl_ref = new File("Control.fas");
+                File fl_ref = new File("ref_HVR1.fas");
                 
                 String refFile_name = fl_ref.getPath();
                 
@@ -43,7 +43,7 @@ public class ErrorCorrectionTest {
                 
                 DataSet refs = new DataSet(refFile_name,'c');
                 
-                int gapop = 15;
+                int gapop = 20;
                 int gapext = 6;
                 int dominparamgen = 25;
                 int dominparampostpr = 25; //30
@@ -108,13 +108,13 @@ public class ErrorCorrectionTest {
                     ds.setFileNameShort(dset_file_name);
                     
                     
-//                    ds.fixDirectionGenotypingRefParallel(refs, gapop, gapext);
+                    ds.fixDirectionGenotypingRefParallel(refs, gapop, gapext);
 //                   ds.fixDirection(refs.reads.get(0), gapop, gapext);
 //                    ds.PrintReads("gilberto_rev.fas");
 //                    ds.PrintUniqueReadsWithTagGenotype(folder_name_input + File.separator + "reads.fas", "read");
-//                    HashMap<String, DataSet> hm = ds.separateGenotypes();
-                    HashMap<String, DataSet> hm = new HashMap();
-                    hm.put("hav", ds);
+                    HashMap<String, DataSet> hm = ds.separateGenotypes();
+ //                   HashMap<String, DataSet> hm = new HashMap();
+//                    hm.put("hav", ds);
                     for (Map.Entry me : hm.entrySet())
                     {
                                                

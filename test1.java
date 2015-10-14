@@ -6,6 +6,10 @@
 
 package ErrorCorrection;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
 import org.biojava3.alignment.Alignments;
 import org.biojava3.alignment.Alignments.PairwiseSequenceAlignerType;
 import org.biojava3.alignment.SimpleGapPenalty;
@@ -21,37 +25,29 @@ import org.biojava3.core.sequence.compound.NucleotideCompound;
  * @author kki8
  */
 public class test1 {
-public static void main(String[] args){
-		String targetSeq = "CACGTTTCTTGTGGCAGCTTAAGTTTGAATGTCATTTCTTCAATGGGACGGA"+
-		          "GCGGGTGCGGTTGCTGGAAAGATGCATCTATAACCAAGAGGAGTCCGTGCGCTTCGACAGC"+
-			  "GACGTGGGGGAGTACCGGGCGGTGACGGAGCTGGGGCGGCCTGATGCCGAGTACTGGAACA"+
-			  "GCCAGAAGGACCTCCTGGAGCAGAGGCGGGCCGCGGTGGACACCTACTGCAGACACAACTA"+ 
-			  "CGGGGTTGGTGAGAGCTTCACAGTGCAGCGGCGAG";
-		DNASequence target = new DNASequence(targetSeq,
-				AmbiguityDNACompoundSet.getDNACompoundSet());
+public static void main(String[] args) throws IOException, InterruptedException, ExecutionException
+        {
+    
+		File folder = new File("Thailand_output1");
+                DataSet ds = new DataSet();
+                
+                File fl_ref = new File("ref_HVR1.fas");
+                String refFile_name = fl_ref.getPath();
+                DataSet refs = new DataSet(refFile_name,'c');
  
-		String querySeq = "ACGAGTGCGTGTTTTCCCGCCTGGTCCCCAGGCCCCCTTTCCGTCCTCAGGAA"+
-			  "GACAGAGGAGGAGCCCCTCGGGCTGCAGGTGGTGGGCGTTGCGGCGGCGGCCGGTTAAGGT"+
-			  "TCCCAGTGCCCGCACCCGGCCCACGGGAGCCCCGGACTGGCGGCGTCACTGTCAGTGTCTT"+
-			  "CTCAGGAGGCCGCCTGTGTGACTGGATCGTTCGTGTCCCCACAGCACGTTTCTTGGAGTAC"+
-			  "TCTACGTCTGAGTGTCATTTCTTCAATGGGACGGAGCGGGTGCGGTTCCTGGACAGATACT"+
-			  "TCCATAACCAGGAGGAGAACGTGCGCTTCGACAGCGACGTGGGGGAGTTCCGGGCGGTGAC"+
-			  "GGAGCTGGGGCGGCCTGATGCCGAGTACTGGAACAGCCAGAAGGACATCCTGGAAGACGAG"+
-			  "CGGGCCGCGGTGGACACCTACTGCAGACACAACTACGGGGTTGTGAGAGCTTCACCGTGCA"+ 
-			  "GCGGCGAGACGCACTCGT";
-		DNASequence query = new DNASequence(querySeq,
-				AmbiguityDNACompoundSet.getDNACompoundSet());
- 
-		SubstitutionMatrix<NucleotideCompound> matrix = SubstitutionMatrixHelper.getNuc4_4();
- 
-		SimpleGapPenalty gapP = new SimpleGapPenalty();
-		gapP.setOpenPenalty((short)5);
-		gapP.setExtensionPenalty((short)2);
- 
-		SequencePair<DNASequence, NucleotideCompound> psa =
-				Alignments.getPairwiseAlignment(query, target,PairwiseSequenceAlignerType.LOCAL, gapP, matrix);
- 
-		System.out.println(psa);
-	}
+                File[] list_files = folder.listFiles();
+                
+                for (int i = 0; i < list_files.length; i++)
+                {
+                    
+                    String dset_file = list_files[i].getPath();
+                    String dset_file_name = list_files[i].getName();
+                    DataSet ds1 = new DataSet(dset_file,"ET");
+ //                   ds.reads.addAll(ds1.reads);
+                    ds1.fixDirectionGenotypingRefParallel(refs, 20, 6);
+                    HashMap<String, DataSet> hm = ds1.separateGenotypes();
+                }
+ //               ds.PrintUniqueReads("TH208_all");
 
+}
 }

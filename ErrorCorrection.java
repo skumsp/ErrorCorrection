@@ -217,7 +217,7 @@ public class ErrorCorrection {
                 
                 DataSet refs = new DataSet(refFile_name,'c');
                 
-                int gapop = 15;
+                int gapop = 20;
                 int gapext = 6;
 	
                     

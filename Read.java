@@ -441,15 +441,16 @@ public class Read extends Sequence {
 		SequencePair<DNASequence, NucleotideCompound> psa =
 				Alignments.getPairwiseAlignment(query, target,
 						PairwiseSequenceAlignerType.GLOBAL, gapP, matrix);
+                
                
                 
-/*                for (int i = 1; i <= psa.getLength(); i++)
+                for (int i = 1; i <= psa.getLength(); i++)
                     System.out.print(psa.getCompoundAt(1, i));
                 System.out.println();
                 for (int i = 1; i <= psa.getLength(); i++)
                     System.out.print(psa.getCompoundAt(2, i));
                 System.out.println();
-                System.out.println("---------------------------");*/
+                System.out.println("---------------------------");
                 
                 int st = 1;
                 while (psa.hasGap(st))
@@ -492,6 +493,14 @@ public class Read extends Sequence {
 		gapP.setExtensionPenalty((short)gapext);
  
 		SequencePair<DNASequence, NucleotideCompound> psa = Alignments.getPairwiseAlignment(query, target, PairwiseSequenceAlignerType.GLOBAL, gapP, matrix);
+                
+            /*    for (int i = 1; i <= psa.getLength(); i++)
+                    System.out.print(psa.getCompoundAt(1, i));
+                System.out.println();
+                for (int i = 1; i <= psa.getLength(); i++)
+                    System.out.print(psa.getCompoundAt(2, i));
+                System.out.println();
+                System.out.println("---------------------------");*/
                 
                return psa.getLength() - psa.getNumIdenticals();
                
