@@ -1264,8 +1264,8 @@ public class Corrector {
                     if ((count == 1)&&(hm.containsKey('-')))
                         for (Read r : hap.reads)
                             r.corrections[i] = new Correction('D');
-                    if (count != 2)
-                        continue;
+//                    if (count != 2)
+//                        continue;
                     if (hm.containsKey('-'))
                     {
                         char nongap = 'z';
@@ -1279,8 +1279,13 @@ public class Corrector {
                                 gap_fr = (Integer) me.getValue();
                             else
                             {
-                                nongap_fr = (Integer) me.getValue();
-                                nongap = (Character) me.getKey();
+                                int nongap_fr_curr = (Integer) me.getValue();
+                                char nongap_curr = (Character) me.getKey();
+                                if (nongap_fr_curr > nongap_fr)
+                                {
+                                    nongap_fr = nongap_fr_curr;
+                                    nongap = nongap_curr;
+                                }
                             }
                         }
                         boolean homopError = true;

@@ -37,7 +37,7 @@ public static void main(String[] args) throws IOException, InterruptedException 
                 boolean toPostprocessHeur = false; //???
                 
                 
-            String folder_name = "primer_removed";
+            String folder_name = "Singapore";
             File folder = new File(folder_name);
             System.out.println(folder.exists());
             File[] list_files = folder.listFiles();
@@ -62,7 +62,7 @@ public static void main(String[] args) throws IOException, InterruptedException 
     //                ds.findHaplotypes();
 
     //                ds.PrintHaplotypes(dset_file_name+"_haplotypes.fas");
-                    String idAlignAlg = "Clustal";
+                    String idAlignAlg = "Muscle";
                     String idMethod = "ET";
                         cr.postprocessHaplotypes(dset_file_name,gapop,gapext,dominparampostpr,idAlignAlg,idMethod);
                         System.out.println(dset_file_name);

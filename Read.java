@@ -444,13 +444,13 @@ public class Read extends Sequence {
                 
                
                 
-                for (int i = 1; i <= psa.getLength(); i++)
+/*                for (int i = 1; i <= psa.getLength(); i++)
                     System.out.print(psa.getCompoundAt(1, i));
                 System.out.println();
                 for (int i = 1; i <= psa.getLength(); i++)
                     System.out.print(psa.getCompoundAt(2, i));
                 System.out.println();
-                System.out.println("---------------------------");
+                System.out.println("---------------------------"); */
                 
                 int st = 1;
                 while (psa.hasGap(st))
@@ -477,6 +477,61 @@ public class Read extends Sequence {
                 
 //                return ((double) d)/(end-st+1);
                 return d;
+                
+        }
+        public double calcEditDistRelAlign(Read r, int gapop, int gapext) throws IOException
+                 // <editor-fold defaultstate="collapsed" desc=" DESCRIPTION ">
+        {
+
+		DNASequence target = new DNASequence(this.nucl,
+				AmbiguityDNACompoundSet.getDNACompoundSet());
+		DNASequence query = new DNASequence(r.nucl,
+				AmbiguityDNACompoundSet.getDNACompoundSet());
+ 
+		SubstitutionMatrix<NucleotideCompound> matrix = SubstitutionMatrixHelper.getNuc4_4();
+ 
+		SimpleGapPenalty gapP = new SimpleGapPenalty();
+		gapP.setOpenPenalty((short)gapop);
+		gapP.setExtensionPenalty((short)gapext);
+ 
+		SequencePair<DNASequence, NucleotideCompound> psa =
+				Alignments.getPairwiseAlignment(query, target,
+						PairwiseSequenceAlignerType.GLOBAL, gapP, matrix);
+                
+               
+                
+/*                for (int i = 1; i <= psa.getLength(); i++)
+                    System.out.print(psa.getCompoundAt(1, i));
+                System.out.println();
+                for (int i = 1; i <= psa.getLength(); i++)
+                    System.out.print(psa.getCompoundAt(2, i));
+                System.out.println();
+                System.out.println("---------------------------"); */
+                
+                int st = 1;
+                while (psa.hasGap(st))
+                    st++;
+                int end = psa.getLength();
+                while (psa.hasGap(end))
+                    end--;
+                
+                int d = 0;
+                for (int i = st; i <= end; i++)
+                    if ((psa.getCompoundAt(1, i) != psa.getCompoundAt(2, i)) && !(psa.hasGap(i)))
+                    {
+//                        System.out.println(i);
+                        d++;
+                    }
+                
+/*                System.out.println(psa);
+                System.out.println(st);
+                System.out.println(end);
+                System.out.println(psa.getNumIdenticals());
+                System.out.println(((double) d)/(end-st+1));*/
+               
+                
+                
+                return 100*((double) d)/(end-st+1);
                 
         }
         public int calcEditDistAbsAlignWithGaps(Read r, int gapop, int gapext) throws IOException

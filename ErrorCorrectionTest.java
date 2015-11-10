@@ -23,8 +23,8 @@ public class ErrorCorrectionTest {
                 int toFindHapl = Integer.parseInt(args[4]);
                 int errorsseglen = Integer.parseInt(args[5]);*/
                 
-                String folder_name_input  = "Thailand";
-                String outFolder = "Thailand_output";
+                String folder_name_input  = "test_genot1";
+                String outFolder = "test_genot_output";
                 File fl = new File(folder_name_input);
                 
                 String folder_name  = fl.getPath();
@@ -35,7 +35,7 @@ public class ErrorCorrectionTest {
                     File f = new File(outFolder);
                     f.mkdir();
                 }
-                File fl_ref = new File("ref_HVR1.fas");
+                File fl_ref = new File("HCV_HVR1_264_11_temp.fas");
                 
                 String refFile_name = fl_ref.getPath();
                 
@@ -51,9 +51,10 @@ public class ErrorCorrectionTest {
                 int nIter = 3;
                 int errorsseglen = 0;
                 int toFindHapl = 1;
-                int nProc = Runtime.getRuntime().availableProcessors();
+                int nProc = 10;
                 String alignmethod = ""; // "Muscle" or "Clustal"
-                int lt = 100;
+                int lt = 220;
+                double refDistPerc = 30;
 	
                     
 		int mErPerc = 50;
@@ -101,14 +102,14 @@ public class ErrorCorrectionTest {
 
                     DataSet ds = new DataSet(dset_file,lt);
                     ds.setK(k);
-                    ds.setAvProc(1);
+                    ds.setAvProc(nProc);
                     ds.setLenThr(lt);
                     ds.setMaxAllErrorsPerc(mErPerc);
                     ds.setFindErrorsSeglen(errorsseglen);
                     ds.setFileNameShort(dset_file_name);
                     
                     
-                    ds.fixDirectionGenotypingRefParallel(refs, gapop, gapext);
+                    ds.fixDirectionGenotypingRefParallel(refs, gapop, gapext,refDistPerc);
 //                   ds.fixDirection(refs.reads.get(0), gapop, gapext);
 //                    ds.PrintReads("gilberto_rev.fas");
 //                    ds.PrintUniqueReadsWithTagGenotype(folder_name_input + File.separator + "reads.fas", "read");
@@ -122,7 +123,7 @@ public class ErrorCorrectionTest {
                         String dset_file_name_short = dset_file_name + "_" + genot;
                         ds = (DataSet) me.getValue();
                         ds.setK(k);
-                        ds.setAvProc(1);
+                        ds.setAvProc(nProc);
                         ds.setLenThr(lt);
                         ds.setMaxAllErrorsPerc(mErPerc);
                         ds.setFindErrorsSeglen(errorsseglen);
@@ -130,6 +131,8 @@ public class ErrorCorrectionTest {
                         
                         String dset_file_seqs = outFolder + File.separator +tag+"_"+genot+"_corrected.fas";
                         String dset_file_hapl = outFolder + File.separator +tag+"_"+genot+"_haplotypes.fas";
+                        String dset_file_raw = outFolder + File.separator +tag+"_"+genot+"_raw.fas";
+                        ds.PrintReads(dset_file_raw);
 
                         if (isGhost)
                         {

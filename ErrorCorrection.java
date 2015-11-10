@@ -29,6 +29,7 @@ public class ErrorCorrection {
         private static final String DOMINPOSTPROC_PARAMETER = "dompostproc";
         private static final String CLUSTAL_PARAMETER = "clustalw";
         private static final String MUSCLE_PARAMETER = "muscle";
+        private static final String DISTREF_PARAMETER = "distref";
         static final String CLUSATL = "Clustal";
         static final String MUSCLE = "Muscle";
         static File env_path;
@@ -63,6 +64,7 @@ public class ErrorCorrection {
                 String alignmethod = ""; // "Muscle" or "Clustal"
                 int lt = 220;
                 String outFolder = "";
+                double distRef = 30;
                 
                 MutuallyExclusiveGroup group = parser.addMutuallyExclusiveGroup("Align");
 
@@ -147,6 +149,13 @@ public class ErrorCorrection {
                         .type(Integer.class)
                         .help("1, if haplotypes should be outputted "
                         + "0, otherwise (Default: " + toFindHapl + ")");
+                
+                parser.addArgument("-distref").dest(DISTREF_PARAMETER)
+                        .metavar("maximal distance to reference")
+                        .setDefault(distRef)
+                        .type(Double.class)
+                        .help("Distance to reference "
+                        + "(Default: " + distRef + ")");
 
                 parser.addArgument("-dg").dest(DOMINGEN_PARAMETER)
                         .metavar("dominparamgen")
@@ -195,6 +204,7 @@ public class ErrorCorrection {
                     dominparamgen = n.getInt(DOMINGEN_PARAMETER);
                     dominparampostpr = n.getInt(DOMINPOSTPROC_PARAMETER);
                     toFindHapl = n.getInt(H_PARAMETER);
+                    distRef = n.getDouble(DISTREF_PARAMETER);
                     lt = n.getInt(LEN_PARAMETER);
                 } catch (ArgumentParserException e) {
                     e.printStackTrace();
@@ -279,7 +289,7 @@ public class ErrorCorrection {
                     ds.setFindErrorsSeglen(errorsseglen);
                     ds.setFileNameShort(dset_file_name);
                     
-                    ds.fixDirectionGenotypingRefParallel(refs, gapop, gapext);
+                    ds.fixDirectionGenotypingRefParallel(refs, gapop, gapext, distRef);
                     
                     HashMap<String, DataSet> hm = ds.separateGenotypes();
                     for (Map.Entry me : hm.entrySet())
@@ -289,7 +299,7 @@ public class ErrorCorrection {
                         String dset_file_name_short = tag + "_" + genot;
                         ds = (DataSet) me.getValue();
                         ds.setK(k);
-                        ds.setAvProc(1);
+                        ds.setAvProc(nProc);
                         ds.setLenThr(lt);
                         ds.setMaxAllErrorsPerc(mErPerc);
                         ds.setFindErrorsSeglen(errorsseglen);

@@ -2903,13 +2903,35 @@ public class DataSet {
         public void fixDirectionGenotypingRefParallel(DataSet refs, int gapop, int gapext) throws InterruptedException, ExecutionException
         {
                  List< Future > futuresList = new ArrayList< Future >();
-                 int nrOfProcessors = Runtime.getRuntime().availableProcessors();
-//                 int nrOfProcessors = 1;
+//                 int nrOfProcessors = Runtime.getRuntime().availableProcessors();
+                 int nrOfProcessors = this.avProc;
                  ExecutorService eservice = Executors.newFixedThreadPool(nrOfProcessors);
                  
 		 for (Read r : reads)
 		 {
                         RevCompGenTask rt = new RevCompGenTask(r,refs,gapop,gapext);
+                        futuresList.add(eservice.submit(rt));
+			 
+		 }
+                  Object taskResult;
+                  int i = 0;
+                  for(Future future:futuresList) 
+                  {
+                        i++;
+                        taskResult = future.get();
+                        System.out.println("RevComp: read "+i + "/" + reads.size());                            
+                  }
+        }
+        public void fixDirectionGenotypingRefParallel(DataSet refs, int gapop, int gapext, double distRefPerc) throws InterruptedException, ExecutionException
+        {
+                 List< Future > futuresList = new ArrayList< Future >();
+//                 int nrOfProcessors = Runtime.getRuntime().availableProcessors();
+                 int nrOfProcessors = this.avProc;
+                 ExecutorService eservice = Executors.newFixedThreadPool(nrOfProcessors);
+                 
+		 for (Read r : reads)
+		 {
+                        RevCompGenTask rt = new RevCompGenTask(r,refs,gapop,gapext,distRefPerc);
                         futuresList.add(eservice.submit(rt));
 			 
 		 }

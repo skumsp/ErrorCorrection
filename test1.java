@@ -9,6 +9,8 @@ package ErrorCorrection;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Stack;
 import java.util.concurrent.ExecutionException;
 import org.biojava3.alignment.Alignments;
 import org.biojava3.alignment.Alignments.PairwiseSequenceAlignerType;
@@ -47,6 +49,10 @@ public static void main(String[] args) throws IOException, InterruptedException,
                     ds1.fixDirectionGenotypingRefParallel(refs, 20, 6);
                     HashMap<String, DataSet> hm = ds1.separateGenotypes();
                 }
+                Stack s = new Stack();
+                LinkedList l = new LinkedList();
+               s.isEmpty();
+              
  //               ds.PrintUniqueReads("TH208_all");
 
 }
