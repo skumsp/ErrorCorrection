@@ -498,14 +498,21 @@ public class Read extends Sequence {
 				Alignments.getPairwiseAlignment(query, target,
 						PairwiseSequenceAlignerType.GLOBAL, gapP, matrix);
                 
-               
+/*               int rd = (int) (1000*Math.random());
+               FileWriter fw = new FileWriter("align_" + this.name + "_" + r.name + "_" + rd + ".fas");
                 
-/*                for (int i = 1; i <= psa.getLength(); i++)
-                    System.out.print(psa.getCompoundAt(1, i));
-                System.out.println();
+               String nucl1 = "";
+               String nucl2 = "";
+               
                 for (int i = 1; i <= psa.getLength(); i++)
-                    System.out.print(psa.getCompoundAt(2, i));
-                System.out.println();
+                    nucl1 += psa.getCompoundAt(1, i);
+ //               System.out.println();
+                for (int i = 1; i <= psa.getLength(); i++)
+                    nucl2 += psa.getCompoundAt(2, i);
+                
+                fw.write(">" + this.name + "\n" + nucl1 + "\n" + ">" + r.name + "\n" + nucl2 + "\n");
+                fw.close();
+/*                System.out.println();
                 System.out.println("---------------------------"); */
                 
                 int st = 1;
@@ -517,7 +524,8 @@ public class Read extends Sequence {
                 
                 int d = 0;
                 for (int i = st; i <= end; i++)
-                    if ((psa.getCompoundAt(1, i) != psa.getCompoundAt(2, i)) && !(psa.hasGap(i)))
+//                    if ((psa.getCompoundAt(1, i) != psa.getCompoundAt(2, i)) && !(psa.hasGap(i)))
+                    if (psa.getCompoundAt(1, i) != psa.getCompoundAt(2, i))
                     {
 //                        System.out.println(i);
                         d++;

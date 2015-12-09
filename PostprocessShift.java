@@ -16,7 +16,7 @@ public class PostprocessShift {
     public static void main(String[] args) throws IOException, InterruptedException {
 
 
-            String folder_name = "Singapore";
+            String folder_name = "Run4_1b";
             File folder = new File(folder_name);
             System.out.println(folder.exists());
             File[] list_files = folder.listFiles();

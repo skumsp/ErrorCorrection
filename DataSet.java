@@ -1059,7 +1059,7 @@ public class DataSet {
             double P = 1;
             // put value of lamba into Poisson class (static for simplicity)
                         int r = 1;
-            while (valuesDistribution1[r] != 0)
+            while ((r < valuesDistribution1.length) && (valuesDistribution1[r] != 0))
                 r++;
             System.out.println("r= " + r);
             double[] valuesDistributionS = new double[r-1];
