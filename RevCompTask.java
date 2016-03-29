@@ -13,6 +13,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.StringTokenizer;
 import java.util.concurrent.Callable;
+import org.biojava.nbio.core.exceptions.CompoundNotFoundException;
 
 /**
  *
@@ -34,7 +35,7 @@ public class RevCompTask implements Callable{
        gapext = gapext1;
    }
 
-   public Object call() throws FileNotFoundException, IOException 
+   public Object call() throws FileNotFoundException, IOException, CompoundNotFoundException 
    {
        int bestDist = Integer.MAX_VALUE;
        int toRev = 0;

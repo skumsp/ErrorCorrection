@@ -7,7 +7,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
-import org.biojava3.alignment.Alignments;
+import org.biojava.nbio.alignment.Alignments;
+import org.biojava.nbio.alignment.Alignments.PairwiseSequenceAlignerType;
+import org.biojava.nbio.alignment.SimpleGapPenalty;
+import org.biojava.nbio.alignment.SubstitutionMatrixHelper;
+import org.biojava.nbio.alignment.template.SequencePair;
+import org.biojava.nbio.alignment.template.SubstitutionMatrix;
+import org.biojava.nbio.core.exceptions.CompoundNotFoundException;
+import org.biojava.nbio.core.sequence.DNASequence;
+import org.biojava.nbio.core.sequence.compound.AmbiguityDNACompoundSet;
+import org.biojava.nbio.core.sequence.compound.NucleotideCompound;
+/*import org.biojava3.alignment.Alignments;
 import org.biojava3.alignment.Alignments.PairwiseSequenceAlignerType;
 import org.biojava3.alignment.SimpleGapPenalty;
 import org.biojava3.alignment.SubstitutionMatrixHelper;
@@ -15,7 +25,8 @@ import org.biojava3.alignment.template.SequencePair;
 import org.biojava3.alignment.template.SubstitutionMatrix;
 import org.biojava3.core.sequence.DNASequence;
 import org.biojava3.core.sequence.compound.AmbiguityDNACompoundSet;
-import org.biojava3.core.sequence.compound.NucleotideCompound;
+import org.biojava3.core.sequence.compound.NucleotideCompound;*/
+
 
 public class Read extends Sequence {
 	public String name;
@@ -24,7 +35,8 @@ public class Read extends Sequence {
 	int frequency;
 	Correction[] corrections;
 	int[] NuclType;
-        String genotype;
+        public String genotype;
+        public double distgen;
 	public Read(String s)
 	{
 		super(s);
@@ -367,7 +379,7 @@ public class Read extends Sequence {
         {
             return frequency;
         }
-        public double calcEditDistAlign(Read r, int gapop, int gapext) throws IOException
+        public double calcEditDistAlign(Read r, int gapop, int gapext) throws IOException, CompoundNotFoundException
                  // <editor-fold defaultstate="collapsed" desc=" DESCRIPTION ">
         {
 
@@ -423,7 +435,7 @@ public class Read extends Sequence {
                 
         }
         // </editor-fold>
-        public double calcEditDistAbsAlign(Read r, int gapop, int gapext) throws IOException
+        public double calcEditDistAbsAlign(Read r, int gapop, int gapext) throws IOException, CompoundNotFoundException
                  // <editor-fold defaultstate="collapsed" desc=" DESCRIPTION ">
         {
 
@@ -441,7 +453,7 @@ public class Read extends Sequence {
 		SequencePair<DNASequence, NucleotideCompound> psa =
 				Alignments.getPairwiseAlignment(query, target,
 						PairwiseSequenceAlignerType.GLOBAL, gapP, matrix);
-                
+                               
                
                 
 /*                for (int i = 1; i <= psa.getLength(); i++)
@@ -479,7 +491,64 @@ public class Read extends Sequence {
                 return d;
                 
         }
-        public double calcEditDistRelAlign(Read r, int gapop, int gapext) throws IOException
+        public double calcEditDistAbsAlignWithGapsIgnoreTails(Read r, int gapop, int gapext) throws IOException, CompoundNotFoundException
+                 // <editor-fold defaultstate="collapsed" desc=" DESCRIPTION ">
+        {
+
+		DNASequence target = new DNASequence(this.nucl,
+				AmbiguityDNACompoundSet.getDNACompoundSet());
+		DNASequence query = new DNASequence(r.nucl,
+				AmbiguityDNACompoundSet.getDNACompoundSet());
+ 
+		SubstitutionMatrix<NucleotideCompound> matrix = SubstitutionMatrixHelper.getNuc4_4();
+ 
+		SimpleGapPenalty gapP = new SimpleGapPenalty();
+		gapP.setOpenPenalty((short)gapop);
+		gapP.setExtensionPenalty((short)gapext);
+ 
+		SequencePair<DNASequence, NucleotideCompound> psa =
+				Alignments.getPairwiseAlignment(query, target,
+						PairwiseSequenceAlignerType.GLOBAL, gapP, matrix);
+                               
+               
+                
+/*                for (int i = 1; i <= psa.getLength(); i++)
+                    System.out.print(psa.getCompoundAt(1, i));
+                System.out.println();
+                for (int i = 1; i <= psa.getLength(); i++)
+                    System.out.print(psa.getCompoundAt(2, i));
+                System.out.println();
+                System.out.println("---------------------------"); */
+                
+                int st = 1;
+                while (psa.hasGap(st))
+                    st++;
+                int end = psa.getLength();
+                while (psa.hasGap(end))
+                    end--;
+                
+                int d = 0;
+                for (int i = st; i <= end; i++)
+//                    if ((psa.getCompoundAt(1, i) != psa.getCompoundAt(2, i)) && !(psa.hasGap(i)))
+                    if (psa.getCompoundAt(1, i) != psa.getCompoundAt(2, i))
+                    {
+//                        System.out.println(i);
+                        d++;
+                    }
+                
+/*                System.out.println(psa);
+                System.out.println(st);
+                System.out.println(end);
+                System.out.println(psa.getNumIdenticals());
+                System.out.println(((double) d)/(end-st+1));*/
+               
+                
+                
+//                return ((double) d)/(end-st+1);
+                return d;
+                
+        }
+        public double calcEditDistRelAlign(Read r, int gapop, int gapext) throws IOException, CompoundNotFoundException
                  // <editor-fold defaultstate="collapsed" desc=" DESCRIPTION ">
         {
 
@@ -498,7 +567,7 @@ public class Read extends Sequence {
 				Alignments.getPairwiseAlignment(query, target,
 						PairwiseSequenceAlignerType.GLOBAL, gapP, matrix);
                 
-/*               int rd = (int) (1000*Math.random());
+ /*              int rd = (int) (100000000*Math.random());
                FileWriter fw = new FileWriter("align_" + this.name + "_" + r.name + "_" + rd + ".fas");
                 
                String nucl1 = "";
@@ -512,7 +581,7 @@ public class Read extends Sequence {
                 
                 fw.write(">" + this.name + "\n" + nucl1 + "\n" + ">" + r.name + "\n" + nucl2 + "\n");
                 fw.close();
-/*                System.out.println();
+                System.out.println();
                 System.out.println("---------------------------"); */
                 
                 int st = 1;
@@ -542,7 +611,70 @@ public class Read extends Sequence {
                 return 100*((double) d)/(end-st+1);
                 
         }
-        public int calcEditDistAbsAlignWithGaps(Read r, int gapop, int gapext) throws IOException
+       
+        public double calcAlignScore(Read r, int gapop, int gapext) throws IOException, CompoundNotFoundException
+                 // <editor-fold defaultstate="collapsed" desc=" DESCRIPTION ">
+        {
+
+		DNASequence target = new DNASequence(this.nucl,
+				AmbiguityDNACompoundSet.getDNACompoundSet());
+		DNASequence query = new DNASequence(r.nucl,
+				AmbiguityDNACompoundSet.getDNACompoundSet());
+ 
+		SubstitutionMatrix<NucleotideCompound> matrix = SubstitutionMatrixHelper.getNuc4_4();
+ 
+		SimpleGapPenalty gapP = new SimpleGapPenalty();
+		gapP.setOpenPenalty((short)gapop);
+		gapP.setExtensionPenalty((short)gapext);
+ 
+		SequencePair<DNASequence, NucleotideCompound> psa =
+				Alignments.getPairwiseAlignment(query, target,
+						PairwiseSequenceAlignerType.GLOBAL, gapP, matrix);
+                
+ /*              int rd = (int) (100000000*Math.random());
+               FileWriter fw = new FileWriter("align_" + this.name + "_" + r.name + "_" + rd + ".fas");
+                
+               String nucl1 = "";
+               String nucl2 = "";
+               
+                for (int i = 1; i <= psa.getLength(); i++)
+                    nucl1 += psa.getCompoundAt(1, i);
+ //               System.out.println();
+                for (int i = 1; i <= psa.getLength(); i++)
+                    nucl2 += psa.getCompoundAt(2, i);
+                
+                fw.write(">" + this.name + "\n" + nucl1 + "\n" + ">" + r.name + "\n" + nucl2 + "\n");
+                fw.close();
+                System.out.println();
+                System.out.println("---------------------------"); */
+                
+                int res = 0;
+                for (int i = 1; i <=psa.getLength(); i++)
+                {
+                    if (psa.hasGap(i))
+                    {
+                        if ((i > 1)&& psa.hasGap(i-1))
+                        {
+                            res -= gapext;
+                        }
+                        else
+                        {
+                            res -= gapop;
+                        }
+                    }
+                    else
+                    {
+                        NucleotideCompound a1 = psa.getCompoundAt(1,i);
+                        NucleotideCompound a2 = psa.getCompoundAt(2,i);
+                        res = res + matrix.getValue(a1, a2);
+                    }
+                }
+
+                
+                return res;
+                
+        }
+        public int calcEditDistAbsAlignWithGaps(Read r, int gapop, int gapext) throws IOException, CompoundNotFoundException
                  // <editor-fold defaultstate="collapsed" desc=" DESCRIPTION ">
         {
 
@@ -591,7 +723,7 @@ public class Read extends Sequence {
         {
             frequency = f;
         }
-        public Read findAverage(Read r, int gapop, int gapext)
+        public Read findAverage(Read r, int gapop, int gapext) throws CompoundNotFoundException
         {
                 DNASequence target = new DNASequence(this.nucl,
 				AmbiguityDNACompoundSet.getDNACompoundSet());
@@ -644,7 +776,7 @@ public class Read extends Sequence {
                          s+=this.nucl.charAt(i);
                  return s;
         }
-        public void clipToRefFillGaps(Read ref, int gapop, int gapext)
+        public void clipToRefFillGaps(Read ref, int gapop, int gapext) throws CompoundNotFoundException
         {
                 DNASequence read = new DNASequence(this.nucl,
 				AmbiguityDNACompoundSet.getDNACompoundSet());
@@ -683,7 +815,7 @@ public class Read extends Sequence {
                 this.nucl = newNucl; 
                 
         }
-        public void clipToRef(Read ref, int gapop, int gapext)
+        public void clipToRef(Read ref, int gapop, int gapext) throws CompoundNotFoundException
         {
                 DNASequence read = new DNASequence(this.nucl,
 				AmbiguityDNACompoundSet.getDNACompoundSet());
@@ -699,6 +831,11 @@ public class Read extends Sequence {
 		SequencePair<DNASequence, NucleotideCompound> psa =
 				Alignments.getPairwiseAlignment(read, refer,
 						PairwiseSequenceAlignerType.LOCAL, gapP, matrix);
+                
+                 
+/*		SequencePair<DNASequence, NucleotideCompound> psa =
+				Alignments.getPairwiseAlignment(query, target,
+						PairwiseSequenceAlignerType.GLOBAL, gapP, matrix);*/
                 
                 int st = 1;
                 while (psa.hasGap(st))

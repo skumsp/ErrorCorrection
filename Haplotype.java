@@ -1,6 +1,7 @@
 package ErrorCorrection;
 
 import java.io.IOException;
+import org.biojava.nbio.core.exceptions.CompoundNotFoundException;
 
 public class Haplotype extends Sequence {
 	int frequency;
@@ -22,7 +23,7 @@ public class Haplotype extends Sequence {
 		else
 			return false;
 	}
-        boolean containsReadAlign(Read r, int gapop, int gapext) throws IOException
+        boolean containsReadAlign(Read r, int gapop, int gapext) throws IOException, CompoundNotFoundException
 	{
 		Read s = new Read(this.nucl);
                 if (s.calcEditDistAbsAlign(r, gapop, gapext) == 0)

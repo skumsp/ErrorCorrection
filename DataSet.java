@@ -11,6 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.biojava.nbio.core.exceptions.CompoundNotFoundException;
 
 public class DataSet {
 	int freqThr;
@@ -66,7 +67,7 @@ public class DataSet {
 		{
 		while (s!= null)
 		{
-//			System.out.println("Reading " + name);
+			System.out.println("Reading " + name);
 			
 			if (s.length() == 0)
 			{
@@ -330,6 +331,7 @@ public class DataSet {
 		String nucl = new String();
 		String name = new String();
 		name = "";
+                int count = 1;
 		int i = 1;
 		int j = s.length();
 		while ((i < s.length())&&(s.charAt(i)!=' '))
@@ -347,7 +349,9 @@ public class DataSet {
 			}
 			if(s.charAt(0) == '>')
 			{
-					reads.add(new Read(nucl, name));	
+					reads.add(new Read(nucl, name));
+//                                        System.out.println("Read " + count + " added");
+                                        count++;
 					nucl = "";
 					name = "";
 					i = 1;
@@ -874,6 +878,7 @@ public class DataSet {
 		HashMap<String, ArrayList<Kmer_occur>> kmers= new HashMap<String, ArrayList<Kmer_occur>>();
 		for (int j = 0; j < reads.size(); j++)
 		{
+                        System.out.println("Calculate kmers: " + j + "//" + reads.size());
 			for (int i = 0; i< reads.get(j).nucl.length()-k+1; i++)
 			{
 				String s = reads.get(j).nucl.substring(i, i+k);
@@ -2185,7 +2190,7 @@ public class DataSet {
                 System.out.println("Goodhapl=" + goodhapl);
                 System.out.println("Badhapl=" + badhapl);
 	}
-        public void findHaplotypesAlign(String idmethod, String idsort, int gapop, int gapext) throws IOException
+        public void findHaplotypesAlign(String idmethod, String idsort, int gapop, int gapext) throws IOException, CompoundNotFoundException
 	{
 		haplotypes = new ArrayList<Haplotype>();
                 if (idsort.equalsIgnoreCase("Length"))
@@ -2281,7 +2286,7 @@ public class DataSet {
 				m = r.getLength();
 		return m;
 	}
-	int getNreads()
+	public int getNreads()
 	{
 		int n = 0;
 		for (Read r : reads)
@@ -2944,7 +2949,7 @@ public class DataSet {
                         System.out.println("RevComp: read "+i + "/" + reads.size());                            
                   }
         }
-        void fixDirectionRef(DataSet refs, int gapop, int gapext) throws InterruptedException, ExecutionException, IOException
+        void fixDirectionRef(DataSet refs, int gapop, int gapext) throws InterruptedException, ExecutionException, IOException, CompoundNotFoundException
         {
                  int i = 1;
 		 for (Read r : reads)
@@ -3238,7 +3243,7 @@ public class DataSet {
             
             return "";
         }
-         public boolean containReadAlignment(Read s) throws IOException
+         public boolean containReadAlignment(Read s) throws IOException, CompoundNotFoundException
         {
             for (Read r : reads)
                 if (r.calcEditDistAbsAlign(s, 15, 6) == 0)
@@ -3295,7 +3300,7 @@ public class DataSet {
             
             return freq;
          }
-          public int getFrequencyAlign(Read s, int gapop, int gapext) throws IOException
+          public int getFrequencyAlign(Read s, int gapop, int gapext) throws IOException, CompoundNotFoundException
          {
              int freq = 0;
               for (Read r : reads)
@@ -3319,7 +3324,7 @@ public class DataSet {
                         break;
                     }
           }
-         public void clipToRefFillGaps(DataSet refs, int gapop, int gapext) throws IOException
+         public void clipToRefFillGaps(DataSet refs, int gapop, int gapext) throws IOException, CompoundNotFoundException
         {
                  int i = 1;
 		 for (Read r : reads)
@@ -3450,7 +3455,7 @@ public class DataSet {
              }
              return hm;
          }
-         public void clipToRef(DataSet refs, int gapop, int gapext) throws IOException
+         public void clipToRef(DataSet refs, int gapop, int gapext) throws IOException, CompoundNotFoundException
         {
                  int i = 1;
 		 for (Read r : reads)
@@ -3496,5 +3501,77 @@ public class DataSet {
                  newReads.add(new Read(nucl,name,freq));
              }
              this.reads = newReads;
+        }
+         public void clipToRefParallel(DataSet refs, int gapop, int gapext) throws IOException, CompoundNotFoundException, InterruptedException, ExecutionException
+        {
+                List< Future > futuresList = new ArrayList< Future >();
+//                 int nrOfProcessors = Runtime.getRuntime().availableProcessors();
+                 int nrOfProcessors = this.avProc;
+                 ExecutorService eservice = Executors.newFixedThreadPool(nrOfProcessors);
+                 
+		 for (Read r : reads)
+		 {
+                        ClipRefTask rt = new ClipRefTask(r,refs,gapop,gapext);
+                        futuresList.add(eservice.submit(rt));
+			 
+		 }
+                  Object taskResult;
+                  int i = 0;
+                  for(Future future:futuresList) 
+                  {
+                        i++;
+                        taskResult = future.get();
+                        System.out.println("Clipping: read "+i + "/" + reads.size());                            
+                  }
+
+                 
+                HashMap<String,String> names = new HashMap();
+                HashMap<String,Integer> seq = new HashMap();
+                for (Read r : this.reads)
+                {
+                    String s = r.nucl;
+                    if (seq.containsKey(s))
+                    {
+                        seq.put(s, seq.get(s) + r.frequency);
+                    }
+                    else
+                    {
+                        seq.put(s, r.frequency);
+                        names.put(s, r.name);
+                    }
+             }
+             ArrayList<Read> newReads = new ArrayList();
+             for (Map.Entry me : seq.entrySet())
+             {
+                 String nucl = (String) me.getKey();
+                 int freq = (Integer) me.getValue();
+                 String name = names.get(nucl);
+                 newReads.add(new Read(nucl,name,freq));
+             }
+             this.reads = newReads;
+        }
+        public  void delShortReads(int cutoff)
+        {
+            ArrayList<Read> toDel = new ArrayList();
+            for (int i = 0; i < reads.size(); i++)
+            {
+                if (reads.get(i).getLength() < cutoff)
+                {
+                    toDel.add(reads.get(i));
+                }
+            }
+            reads.removeAll(toDel);
+        }
+        public  void delNonStandardReadsLength(int len)
+        {
+            ArrayList<Read> toDel = new ArrayList();
+            for (int i = 0; i < reads.size(); i++)
+            {
+                if (reads.get(i).getLength() < cutoff)
+                {
+                    toDel.add(reads.get(i));
+                }
+            }
+            reads.removeAll(toDel);
         }
 }

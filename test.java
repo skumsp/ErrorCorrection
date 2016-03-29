@@ -10,52 +10,51 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
+import org.biojava.nbio.alignment.Alignments;
+import org.biojava.nbio.alignment.Alignments.PairwiseSequenceAlignerType;
+import org.biojava.nbio.alignment.SimpleGapPenalty;
+import org.biojava.nbio.alignment.SubstitutionMatrixHelper;
+import org.biojava.nbio.alignment.template.SequencePair;
+import org.biojava.nbio.alignment.template.SubstitutionMatrix;
+import org.biojava.nbio.core.exceptions.CompoundNotFoundException;
+import org.biojava.nbio.core.sequence.DNASequence;
+import org.biojava.nbio.core.sequence.compound.AmbiguityDNACompoundSet;
+import org.biojava.nbio.core.sequence.compound.NucleotideCompound;
 
 public class test
 {
-    public static void main(String[] args) throws IOException
-    {
-         int mb = 1024*1024;
-        Runtime rt = Runtime.getRuntime();
-        System.out.println(rt.maxMemory()/mb);
-
-		
-//                int i = 9;
-//                int j = 4;
-            String folder_name = "test_autthresh";
-            File folder = new File(folder_name);
-            System.out.println(folder.exists());
-            File[] list_files = folder.listFiles();
-        
-
-
-
-              for (int i = 0; i < list_files.length; i++)
-              {
-
-                int k = 25;
-		int lt = 50;
-		int mErPerc = 50; // 40
-                int errorsseglen = 0;
-
-                 String dset_file_name = list_files[i].getPath();
-
-		String dset_file = dset_file_name;
-                
-                System.out.println(dset_file_name);
-
-                 DataSet ds = new DataSet(dset_file);
-
-
-                    ds.setK(k);
-                    ds.setFindErrorsSeglen(errorsseglen);
-                    ds.setLenThr(lt);
-                    ds.setMaxAllErrorsPerc(mErPerc);
-                    ds.calculateKMersAndKCounts();
-                    ds.findFreqThresholdPoisson();
-                    System.out.println(ds.freqThr);
-                    System.out.println();
-              }
-    }
+    public static void main(String[] args) throws CompoundNotFoundException{
+		String targetSeq = "CACGTTTCTTGTGGCAGCTTAAGTTTGAATGTCATTTCTTCAATGGGACGGA"+
+		          "GCGGGTGCGGTTGCTGGAAAGATGCATCTATAACCAAGAGGAGTCCGTGCGCTTCGACAGC"+
+			  "GACGTGGGGGAGTACCGGGCGGTGACGGAGCTGGGGCGGCCTGATGCCGAGTACTGGAACA"+
+			  "GCCAGAAGGACCTCCTGGAGCAGAGGCGGGCCGCGGTGGACACCTACTGCAGACACAACTA"+ 
+			  "CGGGGTTGGTGAGAGCTTCACAGTGCAGCGGCGAG";
+		DNASequence target = new DNASequence(targetSeq,
+				AmbiguityDNACompoundSet.getDNACompoundSet());
+ 
+		String querySeq = "ACGAGTGCGTGTTTTCCCGCCTGGTCCCCAGGCCCCCTTTCCGTCCTCAGGAA"+
+			  "GACAGAGGAGGAGCCCCTCGGGCTGCAGGTGGTGGGCGTTGCGGCGGCGGCCGGTTAAGGT"+
+			  "TCCCAGTGCCCGCACCCGGCCCACGGGAGCCCCGGACTGGCGGCGTCACTGTCAGTGTCTT"+
+			  "CTCAGGAGGCCGCCTGTGTGACTGGATCGTTCGTGTCCCCACAGCACGTTTCTTGGAGTAC"+
+			  "TCTACGTCTGAGTGTCATTTCTTCAATGGGACGGAGCGGGTGCGGTTCCTGGACAGATACT"+
+			  "TCCATAACCAGGAGGAGAACGTGCGCTTCGACAGCGACGTGGGGGAGTTCCGGGCGGTGAC"+
+			  "GGAGCTGGGGCGGCCTGATGCCGAGTACTGGAACAGCCAGAAGGACATCCTGGAAGACGAG"+
+			  "CGGGCCGCGGTGGACACCTACTGCAGACACAACTACGGGGTTGTGAGAGCTTCACCGTGCA"+ 
+			  "GCGGCGAGACGCACTCGT";
+		DNASequence query = new DNASequence(querySeq,
+				AmbiguityDNACompoundSet.getDNACompoundSet());
+ 
+		SubstitutionMatrix<NucleotideCompound> matrix = SubstitutionMatrixHelper.getNuc4_4();
+ 
+		SimpleGapPenalty gapP = new SimpleGapPenalty();
+		gapP.setOpenPenalty((short)5);
+		gapP.setExtensionPenalty((short)2);
+ 
+		SequencePair<DNASequence, NucleotideCompound> psa =
+				Alignments.getPairwiseAlignment(query, target,
+						PairwiseSequenceAlignerType.LOCAL, gapP, matrix);
+ 
+		System.out.println(psa);
+	}
 }
 

@@ -9,10 +9,8 @@ package ErrorCorrection;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Stack;
 import java.util.concurrent.ExecutionException;
-import org.biojava3.alignment.Alignments;
+/*import org.biojava3.alignment.Alignments;
 import org.biojava3.alignment.Alignments.PairwiseSequenceAlignerType;
 import org.biojava3.alignment.SimpleGapPenalty;
 import org.biojava3.alignment.SubstitutionMatrixHelper;
@@ -20,7 +18,7 @@ import org.biojava3.alignment.template.SequencePair;
 import org.biojava3.alignment.template.SubstitutionMatrix;
 import org.biojava3.core.sequence.DNASequence;
 import org.biojava3.core.sequence.compound.AmbiguityDNACompoundSet;
-import org.biojava3.core.sequence.compound.NucleotideCompound;
+import org.biojava3.core.sequence.compound.NucleotideCompound;*/
 
 /**
  *
@@ -30,10 +28,10 @@ public class test1 {
 public static void main(String[] args) throws IOException, InterruptedException, ExecutionException
         {
     
-		File folder = new File("Thailand_output1");
+		File folder = new File("test_genot");
                 DataSet ds = new DataSet();
                 
-                File fl_ref = new File("ref_HVR1.fas");
+                File fl_ref = new File("HCV_HVR1_264_11_temp.fas");
                 String refFile_name = fl_ref.getPath();
                 DataSet refs = new DataSet(refFile_name,'c');
  
@@ -49,10 +47,6 @@ public static void main(String[] args) throws IOException, InterruptedException,
                     ds1.fixDirectionGenotypingRefParallel(refs, 20, 6);
                     HashMap<String, DataSet> hm = ds1.separateGenotypes();
                 }
-                Stack s = new Stack();
-                LinkedList l = new LinkedList();
-               s.isEmpty();
-              
  //               ds.PrintUniqueReads("TH208_all");
 
 }

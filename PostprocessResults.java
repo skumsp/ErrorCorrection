@@ -37,7 +37,7 @@ public static void main(String[] args) throws IOException, InterruptedException 
                 boolean toPostprocessHeur = false; //???
                 
                 
-            String folder_name = "Singapore1";
+            String folder_name = "Singapore2";
             File folder = new File(folder_name);
             System.out.println(folder.exists());
             File[] list_files = folder.listFiles();

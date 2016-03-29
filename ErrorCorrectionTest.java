@@ -23,8 +23,8 @@ public class ErrorCorrectionTest {
                 int toFindHapl = Integer.parseInt(args[4]);
                 int errorsseglen = Integer.parseInt(args[5]);*/
                 
-                String folder_name_input  = "NS5A";
-                String outFolder = "NS5A_output";
+                String folder_name_input  = "HBV";
+                String outFolder = folder_name_input + "_output";
                 File fl = new File(folder_name_input);
                 
                 String folder_name  = fl.getPath();
@@ -35,7 +35,7 @@ public class ErrorCorrectionTest {
                     File f = new File(outFolder);
                     f.mkdir();
                 }
-                File fl_ref = new File("ref_NS5A.fas");
+                File fl_ref = new File("Ref_HBV_spacer.fas");
                 
                 String refFile_name = fl_ref.getPath();
                 
@@ -51,7 +51,7 @@ public class ErrorCorrectionTest {
                 int nIter = 3;
                 int errorsseglen = 0;
                 int toFindHapl = 1;
-                int nProc = 20;
+                int nProc = 50;
                 String alignmethod = ""; // "Muscle" or "Clustal"
                 int lt = 220;
                 double refDistPerc = 30;
